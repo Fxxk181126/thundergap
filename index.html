@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>雷隙 THUNDERGAP — 雷雨夜 3D 动作游戏</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2305070f'/%3E%3Cpath d='M18 3 7 18h6l-3 11 12-16h-6z' fill='%237fe9ff'/%3E%3C/svg%3E" />
+<style>
+  :root{
+    --cyan:#7fe9ff;
+    --cyan-dim:#3d8fa3;
+    --warn:#ff5a4d;
+    --ink:#05070f;
+    --paper:#e8f4fb;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:100%;height:100%;overflow:hidden;background:#05070f;}
+  body{font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",-apple-system,system-ui,sans-serif;color:var(--paper);cursor:default;}
+  canvas{display:block;position:fixed;inset:0;}
+
+  /* ---------- 屏幕后期层 ---------- */
+  #vignette{position:fixed;inset:0;pointer-events:none;z-index:5;
+    background:radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0) 38%, rgba(0,0,0,.55) 78%, rgba(0,0,0,.88) 100%);}
+  #flash{position:fixed;inset:0;pointer-events:none;z-index:6;background:#dff2ff;opacity:0;mix-blend-mode:screen;}
+  #hurt{position:fixed;inset:0;pointer-events:none;z-index:6;opacity:0;
+    background:radial-gradient(ellipse at 50% 50%, rgba(255,60,40,0) 45%, rgba(255,40,30,.75) 100%);}
+  #drops{position:fixed;inset:0;pointer-events:none;z-index:7;opacity:.5;mix-blend-mode:screen;
+    background-image:
+      radial-gradient(circle at 18% 22%, rgba(190,225,255,.28) 0 1.6px, rgba(0,0,0,0) 2.4px),
+      radial-gradient(circle at 63% 14%, rgba(190,225,255,.22) 0 2.2px, rgba(0,0,0,0) 3px),
+      radial-gradient(circle at 82% 47%, rgba(190,225,255,.2) 0 1.4px, rgba(0,0,0,0) 2.2px),
+      radial-gradient(circle at 34% 71%, rgba(190,225,255,.24) 0 2px, rgba(0,0,0,0) 2.8px),
+      radial-gradient(circle at 51% 88%, rgba(190,225,255,.18) 0 1.5px, rgba(0,0,0,0) 2.2px);
+    background-size:340px 320px, 420px 400px, 300px 380px, 380px 360px, 260px 300px;}
+
+  /* ---------- HUD ---------- */
+  #hud{position:fixed;inset:0;pointer-events:none;z-index:10;opacity:0;transition:opacity .6s;}
+  #hud.on{opacity:1;}
+
+  .panel{position:absolute;padding:10px 14px;background:rgba(6,12,22,.55);
+    border:1px solid rgba(127,233,255,.22);backdrop-filter:blur(6px);border-radius:3px;}
+  .lbl{font-size:10px;letter-spacing:.28em;color:var(--cyan-dim);text-transform:uppercase;}
+
+  #hpBox{left:26px;top:24px;width:230px;}
+  .bar{height:7px;background:rgba(127,233,255,.1);margin-top:7px;position:relative;overflow:hidden;}
+  .bar > i{display:block;height:100%;width:100%;transform-origin:left center;transition:transform .18s;}
+  #hpFill{background:linear-gradient(90deg,#ff5a4d,#ff9a6a);box-shadow:0 0 12px rgba(255,90,77,.6);}
+  #resFill{background:linear-gradient(90deg,#2ea8c7,#7fe9ff);box-shadow:0 0 12px rgba(127,233,255,.6);}
+  .row{display:flex;justify-content:space-between;align-items:baseline;}
+  .val{font-size:13px;color:var(--paper);font-variant-numeric:tabular-nums;}
+
+  #stormBox{left:50%;top:22px;transform:translateX(-50%);width:min(44vw,460px);text-align:center;}
+  #stormFill{background:linear-gradient(90deg,#7fe9ff,#a98bff,#ff5a4d);}
+  #stormTxt{font-size:10px;letter-spacing:.22em;color:#c9d8e6;margin-top:6px;}
+
+  #fragBox{right:26px;top:24px;text-align:right;min-width:150px;}
+  #fragCount{font-size:26px;line-height:1;color:var(--cyan);text-shadow:0 0 16px rgba(127,233,255,.55);font-variant-numeric:tabular-nums;}
+
+  #compass{position:absolute;right:26px;bottom:26px;width:150px;text-align:center;}
+  #dirNeedle{font-size:30px;color:#ff7a6a;line-height:1;text-shadow:0 0 14px rgba(255,90,77,.55);transition:transform .12s linear;}
+  #distTxt{font-size:12px;color:#9fb6c8;margin-top:4px;font-variant-numeric:tabular-nums;}
+
+  #fragCompass{position:absolute;right:26px;bottom:120px;width:150px;text-align:center;}
+  #fragNeedle{font-size:22px;color:var(--cyan);line-height:1;text-shadow:0 0 14px rgba(127,233,255,.6);transition:transform .12s linear;}
+  #fragDistTxt{font-size:12px;color:#9fb6c8;margin-top:2px;font-variant-numeric:tabular-nums;}
+
+  #subtitle{position:absolute;left:50%;bottom:12%;transform:translateX(-50%);
+    max-width:min(70vw,720px);text-align:center;font-size:15px;line-height:1.85;
+    color:#dff2ff;text-shadow:0 2px 18px rgba(0,0,0,.95);opacity:0;transition:opacity .5s;letter-spacing:.03em;}
+  #subtitle.on{opacity:1;}
+  #subtitle b{color:var(--cyan);font-weight:600;}
+
+  #hint{position:absolute;left:26px;bottom:26px;font-size:11px;line-height:1.9;color:#8fa6b8;letter-spacing:.05em;}
+  #hint kbd{display:inline-block;min-width:16px;padding:1px 5px;margin-right:4px;text-align:center;
+    border:1px solid rgba(127,233,255,.3);border-radius:2px;color:var(--cyan);font-family:inherit;font-size:10px;}
+
+  #pulseRing{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:120px;height:120px;border:1px solid rgba(127,233,255,.35);border-radius:50%;opacity:0;}
+
+  /* ---------- 覆盖卡 ---------- */
+  #overlay{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(ellipse at 50% 40%, rgba(10,20,36,.82), rgba(3,5,10,.97));
+    transition:opacity .7s;}
+  #overlay.hide{opacity:0;pointer-events:none;}
+  .card{max-width:760px;padding:0 34px;text-align:center;}
+  .eyebrow{font-size:11px;letter-spacing:.5em;color:var(--cyan-dim);text-transform:uppercase;margin-bottom:20px;}
+  h1{font-size:clamp(38px,7vw,76px);font-weight:800;letter-spacing:.14em;line-height:1;
+    background:linear-gradient(180deg,#ffffff,#7fe9ff 55%,#2b7f9b);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 0 28px rgba(127,233,255,.35));}
+  .sub{margin-top:14px;font-size:clamp(12px,1.5vw,15px);letter-spacing:.34em;color:#9fb6c8;}
+  .logline{margin:26px auto 0;max-width:600px;font-size:14px;line-height:2.1;color:#c9d8e6;}
+  .logline em{color:var(--cyan);font-style:normal;}
+  .keys{margin:30px auto 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px 18px;max-width:560px;
+    font-size:12px;color:#8fa6b8;text-align:left;}
+  .keys span{color:var(--cyan);}
+  .cta{margin-top:34px;display:inline-block;padding:13px 40px;border:1px solid rgba(127,233,255,.5);
+    color:var(--cyan);font-size:13px;letter-spacing:.3em;cursor:pointer;background:rgba(127,233,255,.06);
+    transition:.25s;pointer-events:auto;}
+  .cta:hover{background:rgba(127,233,255,.16);box-shadow:0 0 30px rgba(127,233,255,.28);}
+  .meta{margin-top:22px;font-size:10px;letter-spacing:.26em;color:#4d6577;}
+
+  #endTitle{font-size:clamp(26px,4.4vw,46px);font-weight:800;letter-spacing:.16em;}
+  .win{background:linear-gradient(180deg,#fff,#7fe9ff 60%,#2b7f9b);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .lose{background:linear-gradient(180deg,#fff,#ff8a7d 60%,#8a2b22);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  #endBody{margin:22px auto 0;max-width:600px;font-size:14px;line-height:2.1;color:#c9d8e6;}
+  #stats{margin-top:26px;display:flex;gap:34px;justify-content:center;flex-wrap:wrap;}
+  .stat{text-align:center;}
+  .stat b{display:block;font-size:24px;color:var(--cyan);font-variant-numeric:tabular-nums;}
+  .stat i{font-size:10px;letter-spacing:.22em;color:#5f7a8c;font-style:normal;}
+
+  #loading{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;background:#05070f;
+    font-size:11px;letter-spacing:.4em;color:var(--cyan-dim);}
+
+  @media (max-width:760px){
+    #hpBox{left:12px;top:12px;width:min(48vw,180px);}
+    #fragBox{right:12px;top:12px;min-width:min(36vw,130px);}
+    #stormBox{left:12px;top:122px;transform:none;width:min(calc(100vw - 24px),320px);}
+    #fragCompass{right:12px;bottom:122px;width:118px;}
+    #compass{right:12px;bottom:18px;width:118px;}
+    #subtitle{bottom:clamp(190px,36vh,300px);max-width:calc(100vw - 24px);}
+    #hint{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<div id="vignette"></div>
+<div id="flash"></div>
+<div id="hurt"></div>
+<div id="drops"></div>
+
+<div id="hud">
+  <div class="panel" id="hpBox">
+    <div class="row"><span class="lbl">生命体征</span><span class="val" id="hpTxt">100</span></div>
+    <div class="bar"><i id="hpFill"></i></div>
+    <div class="row" style="margin-top:10px"><span class="lbl">共鸣值</span><span class="val" id="resTxt">100</span></div>
+    <div class="bar"><i id="resFill"></i></div>
+  </div>
+
+  <div class="panel" id="stormBox">
+    <div class="lbl">雷暴穹顶 · 收缩进度</div>
+    <div class="bar" style="height:5px"><i id="stormFill"></i></div>
+    <div id="stormTxt">距离穹顶闭合 — 05:00</div>
+  </div>
+
+  <div class="panel" id="fragBox">
+    <div class="lbl">雷纹碎片</div>
+    <div id="fragCount">0 / 8</div>
+  </div>
+
+  <div class="panel" id="fragCompass">
+    <div class="lbl">最近雷纹</div>
+    <div id="fragNeedle">◆</div>
+    <div id="fragDistTxt">— m</div>
+  </div>
+
+  <div class="panel" id="compass">
+    <div class="lbl">广播塔方位</div>
+    <div id="dirNeedle">▲</div>
+    <div id="distTxt">— m</div>
+  </div>
+
+  <div id="pulseRing"></div>
+  <div id="subtitle"></div>
+
+  <div id="hint">
+    <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 移动 &nbsp; <kbd>Shift</kbd> 疾跑 &nbsp; <kbd>空格</kbd> 跳跃</div>
+    <div><kbd>E</kbd> 回声脉冲（照亮雨夜） &nbsp; <kbd>鼠标</kbd> 视角 &nbsp; <kbd>P</kbd> 暂停 &nbsp; <kbd>M</kbd> 静音 &nbsp; <kbd>R</kbd> 重来</div>
+  </div>
+</div>
+
+<div id="overlay">
+  <div class="card" id="card">
+    <div class="eyebrow">MISTPORT STUDIO · CONCEPT BUILD</div>
+    <h1>雷 隙</h1>
+    <div class="sub">T H U N D E R G A P</div>
+    <p class="logline">
+      暴雨第 <em>19</em> 天。整座城市被一层不肯散去的雷暴穹顶压住，通讯全断。<br />
+      十七岁的 <em>林隙</em> 能听见闪电落下之后残留在空气里的电磁回声——
+      那些被雷声削掉的、没能说出口的话。<br />
+      弟弟林洛的最后一段求救信号，碎成了八片雷纹，散在这座漆黑的城里。<br />
+      在穹顶闭合之前，把它们带回广播塔。
+    </p>
+    <div class="keys">
+      <div><span>W A S D</span> 奔跑</div>
+      <div><span>Shift</span> 疾跑</div>
+      <div><span>空格</span> 跳跃</div>
+      <div><span>E</span> 回声脉冲</div>
+      <div><span>鼠标</span> 转动视角</div>
+      <div><span>P</span> 暂停 / 继续</div>
+      <div><span>M</span> 静音 / R 重来</div>
+    </div>
+    <div class="cta" id="startBtn">进 入 雨 夜</div>
+    <div class="meta">建议佩戴耳机 · 首次点击将启用 3D 音频</div>
+  </div>
+</div>
+
+<div id="loading">L O A D I N G</div>
+
+<!-- D1 模块化：命名空间多文件，按依赖顺序加载，保留 file:// 直开与零构建 -->
+<script src="js/three.min.js"></script>
+<script src="js/tg/config.js"></script>
+<script src="js/tg/util.js"></script>
+<script src="js/tg/audio.js"></script>
+<script src="js/tg/reflector.js"></script>
+<script src="js/tg/world.js"></script>
+<script src="js/tg/player.js"></script>
+<script src="js/tg/fx.js"></script>
+<script src="js/tg/hud.js"></script>
+<script src="js/tg/main.js"></script>
+</body>
+</html>

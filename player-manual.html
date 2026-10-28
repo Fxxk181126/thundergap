@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>雷隙 THUNDERGAP · 玩家手册</title>
+<style>
+  :root{
+    --bg:#06090f;
+    --panel:#0b1220;
+    --panel2:#0e1728;
+    --line:rgba(127,233,255,.18);
+    --cyan:#7fe9ff;
+    --cyan-dim:#3d8fa3;
+    --ink:#e6f2f9;
+    --ink-soft:#93a9ba;
+    --warn:#ffc14d;
+    --danger:#ff5a4d;
+    --ok:#59e2a8;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",-apple-system,system-ui,sans-serif;
+    font-size:15px;line-height:1.95;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;
+    background-image:repeating-linear-gradient(76deg, rgba(127,233,255,.045) 0 1px, transparent 1px 30px);
+  }
+  .wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:0 26px 100px;}
+
+  /* ---------- 封面 ---------- */
+  .cover{
+    min-height:62vh;display:flex;flex-direction:column;justify-content:center;
+    padding:70px 0 46px;border-bottom:1px solid var(--line);position:relative;overflow:hidden;
+  }
+  .cover::after{
+    content:"";position:absolute;right:-90px;top:-40px;width:420px;height:420px;
+    background:radial-gradient(circle, rgba(127,233,255,.14), transparent 62%);pointer-events:none;
+  }
+  .brand{font-size:11px;letter-spacing:.5em;color:var(--cyan-dim);text-transform:uppercase;}
+  .cover h1{
+    margin-top:22px;font-size:clamp(40px,7vw,68px);font-weight:800;letter-spacing:.16em;line-height:1.05;
+    background:linear-gradient(180deg,#fff,#7fe9ff 58%,#2b7f9b);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .cover h2{margin-top:12px;font-size:13px;letter-spacing:.42em;color:var(--ink-soft);font-weight:400;}
+  .cover p.lede{margin-top:30px;max-width:640px;color:#c4d6e3;font-size:15px;line-height:2.1;}
+  .cover .stamp{
+    margin-top:34px;display:inline-flex;gap:22px;flex-wrap:wrap;
+    font-size:11px;letter-spacing:.16em;color:var(--cyan-dim);
+  }
+  .cover .stamp b{color:var(--cyan);font-weight:600;}
+
+  /* ---------- 目录 ---------- */
+  nav{
+    position:sticky;top:0;z-index:20;background:rgba(6,9,15,.92);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--line);margin-bottom:44px;
+  }
+  nav ul{
+    max-width:1080px;margin:0 auto;padding:0 26px;display:flex;gap:4px;overflow-x:auto;
+    list-style:none;
+  }
+  nav a{
+    display:block;padding:13px 13px;font-size:12px;letter-spacing:.1em;color:var(--ink-soft);
+    text-decoration:none;white-space:nowrap;border-bottom:2px solid transparent;transition:.2s;
+  }
+  nav a:hover{color:var(--cyan);border-bottom-color:rgba(127,233,255,.4);}
+
+  /* ---------- 章节 ---------- */
+  section{margin:0 0 62px;scroll-margin-top:64px;}
+  .secHead{display:flex;align-items:baseline;gap:14px;margin-bottom:22px;
+    padding-bottom:12px;border-bottom:1px solid var(--line);}
+  .secNo{font-size:11px;letter-spacing:.32em;color:var(--cyan-dim);}
+  .secHead h3{font-size:24px;font-weight:700;letter-spacing:.1em;}
+  .secHead em{margin-left:auto;font-style:normal;font-size:11px;letter-spacing:.2em;color:#5c7688;}
+
+  h4{font-size:16px;font-weight:700;letter-spacing:.06em;margin:30px 0 12px;color:var(--cyan);}
+  p{margin-bottom:14px;color:#c9dae6;}
+  p.lead2{color:#dceaf3;}
+  strong{color:#fff;font-weight:700;}
+  mark{background:rgba(127,233,255,.16);color:var(--cyan);padding:1px 5px;border-radius:2px;}
+
+  /* ---------- 键位 ---------- */
+  kbd{
+    display:inline-block;min-width:26px;padding:3px 8px;margin:0 2px;text-align:center;
+    border:1px solid rgba(127,233,255,.38);border-bottom-width:2px;border-radius:4px;
+    background:linear-gradient(180deg,#12202f,#0b1420);
+    color:var(--cyan);font-family:inherit;font-size:12px;letter-spacing:.05em;
+  }
+  .keyGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:12px;margin-top:18px;}
+  .keyCard{
+    background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:14px 16px;
+  }
+  .keyCard .k{font-size:12px;letter-spacing:.06em;}
+  .keyCard .d{margin-top:9px;font-size:13px;color:var(--ink-soft);line-height:1.75;}
+  .keyCard b{display:block;margin-bottom:8px;font-size:13px;color:var(--ink);letter-spacing:.06em;}
+
+  /* ---------- HUD 示意 ---------- */
+  .hudDemo{
+    position:relative;height:300px;margin:22px 0 8px;border:1px solid var(--line);border-radius:6px;
+    background:radial-gradient(ellipse at 50% 55%, #101c2e 0%, #070b14 72%);
+    overflow:hidden;
+  }
+  .hudDemo .hb{
+    position:absolute;padding:8px 12px;background:rgba(6,12,22,.72);
+    border:1px solid rgba(127,233,255,.25);border-radius:3px;font-size:10px;letter-spacing:.2em;color:var(--cyan-dim);
+  }
+  .hudDemo .bar{height:6px;background:rgba(127,233,255,.12);margin-top:6px;border-radius:2px;overflow:hidden;}
+  .hudDemo .bar i{display:block;height:100%;}
+  .hudDemo .num{position:absolute;font-size:11px;color:var(--cyan);font-variant-numeric:tabular-nums;letter-spacing:.1em;}
+
+  /* ---------- 表格 ---------- */
+  table{width:100%;border-collapse:collapse;margin:18px 0 6px;font-size:13.5px;}
+  th,td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line);}
+  th{background:var(--panel2);color:var(--cyan-dim);font-weight:600;letter-spacing:.14em;font-size:11px;}
+  td{color:#c9dae6;}
+  td b{color:#fff;}
+  tr:hover td{background:rgba(127,233,255,.03);}
+
+  /* ---------- 提示框 ---------- */
+  .box{border-radius:5px;padding:16px 20px;margin:20px 0;border-left:3px solid;}
+  .box p{margin:0 0 8px;}
+  .box p:last-child{margin:0;}
+  .box .t{font-size:12px;letter-spacing:.22em;font-weight:700;margin-bottom:8px;}
+  .tip{background:rgba(127,233,255,.06);border-color:var(--cyan);}
+  .tip .t{color:var(--cyan);}
+  .warn{background:rgba(255,193,77,.07);border-color:var(--warn);}
+  .warn .t{color:var(--warn);}
+  .danger{background:rgba(255,90,77,.08);border-color:var(--danger);}
+  .danger .t{color:var(--danger);}
+
+  /* ---------- 流程步骤 ---------- */
+  ol.steps{list-style:none;counter-reset:s;margin:18px 0;}
+  ol.steps li{
+    counter-increment:s;position:relative;padding:0 0 20px 52px;margin-bottom:6px;
+  }
+  ol.steps li::before{
+    content:counter(s,decimal-leading-zero);position:absolute;left:0;top:0;
+    width:32px;height:32px;line-height:32px;text-align:center;border-radius:50%;
+    border:1px solid rgba(127,233,255,.35);color:var(--cyan);font-size:12px;background:var(--panel);
+  }
+  ol.steps li::after{
+    content:"";position:absolute;left:16px;top:36px;bottom:0;width:1px;background:var(--line);
+  }
+  ol.steps li:last-child::after{display:none;}
+  ol.steps b{display:block;font-size:15px;margin-bottom:5px;color:#fff;letter-spacing:.05em;}
+  ol.steps span{font-size:13.5px;color:var(--ink-soft);}
+
+  /* ---------- 术语 ---------- */
+  .gloss{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-top:16px;}
+  .gloss div{background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:14px 16px;}
+  .gloss dt{font-size:14px;font-weight:700;color:var(--cyan);letter-spacing:.08em;}
+  .gloss dd{margin-top:6px;font-size:13px;color:var(--ink-soft);line-height:1.8;}
+
+  footer{
+    margin-top:70px;padding-top:26px;border-top:1px solid var(--line);
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;
+    font-size:11px;letter-spacing:.2em;color:#4f6a7c;
+  }
+
+  @media (max-width:720px){
+    nav ul{padding:0 14px;}
+    .cover{min-height:auto;}
+  }
+  @media print{
+    body{background:#fff;color:#111;}
+    body::before{display:none;}
+    nav{display:none;}
+    .wrap{max-width:none;}
+    .cover h1{color:#0a5a72;-webkit-text-fill-color:#0a5a72;}
+    p,td,span{color:#222 !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="cover">
+    <div class="brand">MISTPORT STUDIO · OFFICIAL PLAYER MANUAL</div>
+    <h1>雷 隙</h1>
+    <h2>T H U N D E R G A P &nbsp;·&nbsp; 玩 家 手 册</h2>
+    <p class="lede">
+      欢迎来到暴雨第 19 天的城市。<br />
+      这份手册不会替你挡雷，但它会告诉你：什么时候该跑，什么时候该停下，
+      以及——在那片黑得看不见手指的雨里，怎样用一次脉冲，让整座城市为你亮一秒。
+    </p>
+    <div class="stamp">
+      <span>版本 <b>Concept Build 0.1</b></span>
+      <span>平台 <b>桌面浏览器</b></span>
+      <span>单局时长 <b>约 3–6 分钟</b></span>
+      <span>建议 <b>佩戴耳机</b></span>
+    </div>
+  </header>
+
+  <nav>
+    <ul>
+      <li><a href="#s1">01 世界与角色</a></li>
+      <li><a href="#s2">02 操作</a></li>
+      <li><a href="#s3">03 界面</a></li>
+      <li><a href="#s4">04 核心机制</a></li>
+      <li><a href="#s5">05 危险与伤害</a></li>
+      <li><a href="#s6">06 通关流程</a></li>
+      <li><a href="#s7">07 进阶技巧</a></li>
+      <li><a href="#s8">08 术语与故障排除</a></li>
+    </ul>
+  </nav>
+
+  <!-- 01 -->
+  <section id="s1">
+    <div class="secHead"><span class="secNo">01</span><h3>世界与角色</h3><em>THE WORLD</em></div>
+
+    <p class="lead2">
+      一场不肯停的暴雨已经下了十九天。城市的上空压着一层<strong>雷暴穹顶</strong>——
+      它每落一次闪电就往下收一分，通讯中断，街道积水，能见度接近于零。
+    </p>
+
+    <h4>林隙（Lin Xi）· 主角</h4>
+    <p>
+      十七岁。童年那场雷击没有夺走她的命，只留下一种异常：<mark>她能听见闪电之后残留在空气里的电磁回声</mark>——
+      那些被雷声削掉的、没能说出口的话。在城市失联的夜里，这份能力是唯一的导航。
+    </p>
+
+    <h4>林洛（Lin Luo）· 失踪者</h4>
+    <p>
+      林隙的弟弟。他被困在城市另一端广播塔下的第二级台阶上，水位正在上涨。
+      他最后的求救信号被雷暴撕成<strong>八片雷纹</strong>，散落在积水与高楼之间。
+      八片碎片对应八段无线电残句——你每捡起一片，就多听见他一句话。
+    </p>
+
+    <h4>广播塔 · 终点</h4>
+    <p>
+      城市正中心的旧广播塔，塔顶亮着一盏永不熄灭的红色航空灯。
+      集齐八片雷纹后，塔基闸门会开启——走进去，把最后一段频段发出去。
+    </p>
+
+    <div class="box tip">
+      <div class="t">设计手记</div>
+      <p>雷雨在本作里不是背景音乐，它是唯一的反派：它不追你、不咬你，它只是不断逼近。你要做的是在它的间隙里穿行。</p>
+    </div>
+  </section>
+
+  <!-- 02 -->
+  <section id="s2">
+    <div class="secHead"><span class="secNo">02</span><h3>操作</h3><em>CONTROLS</em></div>
+
+    <p>本作为桌面端键鼠设计，采用第三人称越肩视角。首次点击画面可锁定鼠标指针。</p>
+
+    <div class="keyGrid">
+      <div class="keyCard">
+        <b>移动</b>
+        <div class="k"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 或 <kbd>↑</kbd><kbd>↓</kbd></div>
+        <div class="d">常规行走速度 5.0；按住 Shift 疾跑提升至 8.6。方向以镜头为准。</div>
+      </div>
+      <div class="keyCard">
+        <b>视角</b>
+        <div class="k"><kbd>鼠标移动</kbd> / <kbd>←</kbd><kbd>→</kbd></div>
+        <div class="d">点击画面锁定指针后移动鼠标即可环视；未锁定时可用左右方向键转向。</div>
+      </div>
+      <div class="keyCard">
+        <b>跳跃</b>
+        <div class="k"><kbd>空格</kbd></div>
+        <div class="d">仅在落地时可起跳，跳跃初速 7.4。用于跨越积水、躲开落雷冲击。</div>
+      </div>
+      <div class="keyCard">
+        <b>回声脉冲</b>
+        <div class="k"><kbd>E</kbd></div>
+        <div class="d">本作核心动作。以自身为圆心扩散声呐光纹，点亮城市轮廓与碎片。消耗 25 点共鸣值。</div>
+      </div>
+      <div class="keyCard">
+        <b>疾跑</b>
+        <div class="k"><kbd>Shift</kbd></div>
+        <div class="d">短促点按用于冲过落雷预警圈；长按会更快耗尽视野判断时间。</div>
+      </div>
+      <div class="keyCard">
+        <b>系统</b>
+        <div class="k"><kbd>M</kbd> 静音 · <kbd>R</kbd> 重开 · <kbd>Esc</kbd> 解锁鼠标</div>
+        <div class="d">雷声为程序化实时合成，建议佩戴耳机游玩；按 R 可随时重来一局。</div>
+      </div>
+    </div>
+
+    <div class="box warn">
+      <div class="t">注意</div>
+      <p>本作不支持垂直攀爬：楼体为实心障碍，无法登上屋顶。所有路线都在街道层面展开。</p>
+    </div>
+  </section>
+
+  <!-- 03 -->
+  <section id="s3">
+    <div class="secHead"><span class="secNo">03</span><h3>界面读法</h3><em>HEADS-UP DISPLAY</em></div>
+
+    <p>进入游戏后，屏幕四周会浮现四块仪表。读懂它们，比看清路面更重要。</p>
+
+    <div class="hudDemo">
+      <div class="hb" style="left:24px;top:22px;width:230px;">
+        生命体征 <span style="float:right;color:#ff5a4d">100</span>
+        <div class="bar"><i style="width:78%;background:linear-gradient(90deg,#ff5a4d,#ff9a6a)"></i></div>
+      </div>
+      <div class="hb" style="left:24px;top:92px;width:230px;">
+        共鸣值 <span style="float:right;color:#7fe9ff">100</span>
+        <div class="bar"><i style="width:64%;background:linear-gradient(90deg,#2ea8c7,#7fe9ff)"></i></div>
+      </div>
+      <div class="hb" style="left:50%;top:22px;transform:translateX(-50%);width:300px;text-align:center;">
+        雷暴穹顶 · 收缩进度
+        <div class="bar" style="height:5px"><i style="width:46%;background:linear-gradient(90deg,#7fe9ff,#a98bff,#ff5a4d)"></i></div>
+        <div style="margin-top:6px;color:#c9d8e6;letter-spacing:.16em">距离穹顶闭合 — 01:56</div>
+      </div>
+      <div class="hb" style="right:24px;top:22px;text-align:right;min-width:150px;">
+        雷纹碎片
+        <div style="font-size:24px;color:#7fe9ff;line-height:1.2">3 / 8</div>
+      </div>
+      <div class="hb" style="right:24px;bottom:22px;width:150px;text-align:center;">
+        广播塔方位
+        <div style="font-size:26px;color:#7fe9ff;transform:rotate(38deg);line-height:1.3">▲</div>
+        <div style="color:#9fb6c8;letter-spacing:.1em">63 m</div>
+      </div>
+    </div>
+
+    <table>
+      <thead><tr><th style="width:150px">仪表</th><th>含义与用法</th></tr></thead>
+      <tbody>
+        <tr><td><b>生命体征</b></td><td>初始 100。归零即失败。被天雷正面命中会掉 42，边缘擦伤掉 20。收集碎片可回复 6 点。</td></tr>
+        <tr><td><b>共鸣值</b></td><td>释放回声脉冲的燃料，满值 100，每次脉冲消耗 25（即满值可连放 4 次）。以每秒 7.5 点自动回复，约 3.3 秒回满一次。</td></tr>
+        <tr><td><b>雷暴进度</b></td><td>顶部长条 = 穹顶收缩进度，同时显示剩余时间。走满即失败。每回收一片碎片，进度回退 5%。</td></tr>
+        <tr><td><b>雷纹碎片</b></td><td>已收集 / 总数（8）。集齐后广播塔基闸门开启。</td></tr>
+        <tr><td><b>广播塔方位</b></td><td>箭头始终指向广播塔，下方为直线距离。箭头朝上＝塔在你正前方。</td></tr>
+        <tr><td><b>字幕</b></td><td>屏幕下方的白色文字为弟弟的无线电残句，也是本作的叙事正文。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 04 -->
+  <section id="s4">
+    <div class="secHead"><span class="secNo">04</span><h3>核心机制</h3><em>CORE SYSTEMS</em></div>
+
+    <h4>回声脉冲 · Echo Pulse</h4>
+    <p>
+      按下 <kbd>E</kbd>，林隙会以自身为圆心荡开一圈青色声呐光纹，向四周扩散至 <b>34 米</b>（约 0.8 秒跑完）。
+      光纹扫过之处，<strong>楼体轮廓被点亮、雷纹碎片会显形并保持 5 秒可见</strong>。
+      这是你在近乎全黑的城市里唯一的探路手段。
+    </p>
+    <table>
+      <thead><tr><th style="width:150px">参数</th><th>数值</th></tr></thead>
+      <tbody>
+        <tr><td>消耗</td><td>25 点共鸣值</td></tr>
+        <tr><td>最大半径</td><td>34 米</td></tr>
+        <tr><td>扩散耗时</td><td>约 0.8 秒</td></tr>
+        <tr><td>回复速度</td><td>7.5 / 秒（满值可连放 4 次）</td></tr>
+        <tr><td>显形持续</td><td>碎片点亮后保持 5 秒</td></tr>
+        <tr><td>附加效果</td><td>光纹扩散时自身携带光源，可短暂照亮周围地面</td></tr>
+      </tbody>
+    </table>
+    <div class="box tip">
+      <div class="t">要点</div>
+      <p>脉冲不是照明弹，它是一次「敲击」——你越安静、越舍得等它回满，下一次敲响时能听见的就越远。不要连续按到空。</p>
+    </div>
+
+    <h4>雷纹碎片 · Signal Fragments</h4>
+    <p>
+      全城散落 <b>8 片</b>雷纹，外观是缓慢旋转的青色八面体，外罩一层线框，上方有一道极淡的指引光柱。
+      碎片在远处几乎不可见；进入 <mark>14 米</mark>内会自动透出微光，被脉冲扫过则完全显形。
+      走到碎片旁（1.7 米内）自动拾取，同时播放一段弟弟的无线电残句。
+    </p>
+    <p>拾取的收益是双重的：<strong>推进剧情</strong>，以及<strong>让穹顶回退 5%</strong>（约多争取 10 秒）+ 回复 6 点生命。</p>
+
+    <h4>雷暴穹顶 · Storm Dome</h4>
+    <p>
+      倒计时 <b>215 秒</b>。随着进度上升，整局会发生三件可感知的变化：闪电更频繁、落雷更密集、
+      视野更差（雨幕变厚）。进度超过 75% 后，你的移动速度还会被风雨拖慢约 6%。
+    </p>
+  </section>
+
+  <!-- 05 -->
+  <section id="s5">
+    <div class="secHead"><span class="secNo">05</span><h3>危险与伤害</h3><em>HAZARDS</em></div>
+
+    <h4>天雷 · Lightning Strike</h4>
+    <p>
+      <strong>地面会先浮现一圈红色预警环</strong>，伴随内部红光脉动——这是给你的 1.35 秒逃生窗口。
+      预警结束后，一道白雷从天而降：产生冲击波、屏幕震动、强光，并对范围内造成伤害。
+    </p>
+
+    <table>
+      <thead><tr><th style="width:170px">距离（距落点）</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td>0 – 1.9 米</td><td><b style="color:#ff5a4d">42 点伤害</b> + 强击退（会被掀飞）</td></tr>
+        <tr><td>1.9 – 3.6 米</td><td><b style="color:#ffc14d">20 点伤害</b> + 中等击退</td></tr>
+        <tr><td>3.6 米以外</td><td>安全（仅有震动与强光）</td></tr>
+        <tr><td>预警环半径</td><td>约 3.5 米（请以此为准，不要凭感觉）</td></tr>
+        <tr><td>受击后无敌</td><td>0.9 秒</td></tr>
+      </tbody>
+    </table>
+
+    <div class="box danger">
+      <div class="t">致命误区</div>
+      <p>雷不是落在你「看到的光」那里，而是落在<b>预警环的中心</b>。躲开红圈本身即可——不要试图躲开闪电的视觉位置。</p>
+    </div>
+
+    <h4>落雷频率</h4>
+    <table>
+      <thead><tr><th style="width:170px">穹顶进度</th><th>落雷节奏</th></tr></thead>
+      <tbody>
+        <tr><td>开局（0%）</td><td>约每 4–6 秒一发</td></tr>
+        <tr><td>中期（55%+）</td><td>约每 2–4 秒一发，并有 50% 概率<b>双发齐落</b></td></tr>
+        <tr><td>末期（85%+）</td><td>约每 1.5–3 秒一发，并有额外 40% 概率<b>三发齐落</b></td></tr>
+      </tbody>
+    </table>
+    <p>落雷总是优先生成在你周围 6–22 米范围内，也就是说——<strong>站着不动是最危险的选择。</strong></p>
+
+    <h4>环境闪电</h4>
+    <p>
+      远处的闪电不造成伤害，但会把整座城市瞬间照亮半秒。
+      它是免费的视野：老练的玩家会故意等待一次闪电，再决定往哪条街跑。
+    </p>
+  </section>
+
+  <!-- 06 -->
+  <section id="s6">
+    <div class="secHead"><span class="secNo">06</span><h3>通关流程</h3><em>RUN STRUCTURE</em></div>
+
+    <ol class="steps">
+      <li>
+        <b>落地与定向</b>
+        <span>开局在城市边缘。立刻按一次 <kbd>E</kbd> 释放脉冲，看清四周街道走向；同时确认右上角「广播塔方位」的箭头与距离。</span>
+      </li>
+      <li>
+        <b>收集八片雷纹</b>
+        <span>碎片散落在城市各区的街面上。用脉冲 + 指引光柱定位，逐片回收。每片回退 5% 穹顶进度——这不只是剧情，更是续命。</span>
+      </li>
+      <li>
+        <b>在雨里活下来</b>
+        <span>看到红色预警环立刻离开；保持移动；血量偏低时优先绕路取碎片回血，而不是硬冲。</span>
+      </li>
+      <li>
+        <b>集齐后前往广播塔</b>
+        <span>收满 8 片后字幕会提示闸门已开。跟着罗盘箭头跑到城市正中心，走进塔基（约 9 米内）即触发结局。</span>
+      </li>
+      <li>
+        <b>结局</b>
+        <span>在穹顶闭合前抵达＝<b style="color:#7fe9ff">信号送出</b>；生命归零或倒计时走满＝<b style="color:#ff5a4d">信号遗失</b>。按 <kbd>R</kbd> 可重来一夜。</span>
+      </li>
+    </ol>
+
+    <div class="box tip">
+      <div class="t">时间账</div>
+      <p>总时长 215 秒，8 片碎片共可回退约 40% 进度（约 86 秒）。换言之：<b>只要你把碎片全部收到，时间就是够的</b>——真正会输的原因是掉血和迷路。</p>
+    </div>
+  </section>
+
+  <!-- 07 -->
+  <section id="s7">
+    <div class="secHead"><span class="secNo">07</span><h3>进阶技巧</h3><em>ADVANCED PLAY</em></div>
+
+    <h4>脉冲的节奏感</h4>
+    <p>
+      共鸣值 3.3 秒回满一次，脉冲扩散需 0.8 秒。<strong>正确的节奏是：跑一段 → 停下按 E → 借着显形的 5 秒冲向目标。</strong>
+      把脉冲当作「探照 + 加速」的起跑信号，而不是边跑边乱按。
+    </p>
+
+    <h4>借光而非造光</h4>
+    <p>
+      环境闪电每 0.8–4.2 秒就会来一次，是完全免费的照明。
+      在开阔地带，等一记闪电比浪费一次脉冲更划算——把共鸣值留给碎片密集的街巷。
+    </p>
+
+    <h4>穿过落雷区</h4>
+    <p>
+      预警到你行动有 1.35 秒。以疾跑速度 8.6 计算，你可以横向移动约 11 米——足够从任何一发雷的中心跑出去。
+      <strong>不要往圈外直线后退，横向切出最短。</strong>
+    </p>
+
+    <h4>避免贴墙</h4>
+    <p>
+      你的碰撞半径是 0.5 米，楼体是实心障碍。贴着墙跑时被落雷击退，很容易被卡在墙与雷之间反复吃伤害。
+      尽量让自己在街道中线移动，给击退留出缓冲。
+    </p>
+
+    <h4>罗盘读法</h4>
+    <p>
+      右下角箭头指向广播塔，但<strong>它指的不是路</strong>——中间可能隔着楼。
+      正确用法是：用箭头确认大致方位 → 用脉冲找出那条能走通的街 → 前进。
+    </p>
+
+    <div class="box warn">
+      <div class="t">高进度阶段</div>
+      <p>穹顶超过 75% 后移动速度下降 6%，落雷可能三连发。此时若还差 1–2 片碎片，建议直接放弃收集、全力冲塔——活着的 6 片好过归零的 8 片。</p>
+    </div>
+  </section>
+
+  <!-- 08 -->
+  <section id="s8">
+    <div class="secHead"><span class="secNo">08</span><h3>术语与故障排除</h3><em>APPENDIX</em></div>
+
+    <div class="gloss">
+      <div><dt>雷暴穹顶</dt><dd>笼罩城市的雷暴层，随闪电不断下压，是本作的倒计时与唯一反派。</dd></div>
+      <div><dt>雷纹碎片</dt><dd>被雷暴撕碎的求救信号残片，共 8 片，外观为青色八面体。</dd></div>
+      <div><dt>回声脉冲</dt><dd>林隙的核心能力，以自身为圆心的声呐光纹，用于探路与显形。</dd></div>
+      <div><dt>共鸣值</dt><dd>释放脉冲所需的能量，自动回复，满值可连放四次。</dd></div>
+      <div><dt>预警环</dt><dd>天雷落下前 1.35 秒出现在地面的红色圆环，是唯一的避险信号。</dd></div>
+      <div><dt>广播塔</dt><dd>城市中心的终点建筑，集齐碎片后塔基闸门开启。</dd></div>
+    </div>
+
+    <h4>常见问题</h4>
+    <table>
+      <thead><tr><th style="width:200px">现象</th><th>处理</th></tr></thead>
+      <tbody>
+        <tr><td>点击后鼠标无法转视角</td><td>需在游戏中<b>点击一次画面</b>以锁定指针；按 <kbd>Esc</kbd> 可解锁。</td></tr>
+        <tr><td>没有声音</td><td>按 <kbd>M</kbd> 检查是否静音；浏览器要求首次交互后才允许播放音频，请在开局点击画面。</td></tr>
+        <tr><td>画面卡顿</td><td>雨幕为 14000 条实时粒子，占用较高。请关闭其他标签页，或使用独立显卡浏览器窗口。</td></tr>
+        <tr><td>太黑，看不清路</td><td>这是设定而非故障：按 <kbd>E</kbd> 释放脉冲，或等一记环境闪电照亮城市。</td></tr>
+        <tr><td>卡在墙角</td><td>沿墙面向街道中线方向走即可脱离；本作无法攀爬楼体。</td></tr>
+        <tr><td>想重来一局</td><td>按 <kbd>R</kbd> 重新载入。</td></tr>
+      </tbody>
+    </table>
+
+    <div class="box tip">
+      <div class="t">推荐游玩方式</div>
+      <p>关灯，戴耳机，一次走完 215 秒。雷声与雨声全部为实时程序合成——每一次闪电都不会重复。</p>
+    </div>
+  </section>
+
+  <footer>
+    <span>MISTPORT STUDIO © 2026 · 雷隙 THUNDERGAP</span>
+    <span>PLAYER MANUAL · CONCEPT BUILD 0.1</span>
+  </footer>
+
+</div>
+</body>
+</html>

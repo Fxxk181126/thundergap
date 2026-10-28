@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>雷隙 THUNDERGAP · 技术方案 v0.1</title>
+<style>
+  :root{
+    --bg:#070a11;
+    --bg2:#0a0f1a;
+    --panel:#0d1524;
+    --panel2:#101a2c;
+    --line:rgba(127,233,255,.14);
+    --line2:rgba(127,233,255,.28);
+    --cyan:#7fe9ff;
+    --cyan-dim:#4d93a8;
+    --ink:#e8f3fa;
+    --ink2:#b9cddc;
+    --ink3:#7d93a6;
+    --p0:#ff5a4d;
+    --p1:#ffc14d;
+    --p2:#6f8ba0;
+    --done:#59e2a8;
+    --part:#ffc14d;
+    --plan:#8797a8;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",-apple-system,system-ui,sans-serif;
+    font-size:14.5px;line-height:1.9;
+  }
+
+  .layout{display:flex;max-width:1400px;margin:0 auto;}
+
+  /* ---------- 侧栏 ---------- */
+  aside{
+    width:280px;flex:0 0 280px;position:sticky;top:0;height:100vh;overflow-y:auto;
+    padding:36px 22px 60px;border-right:1px solid var(--line);background:var(--bg2);
+  }
+  .docTag{font-size:10px;letter-spacing:.36em;color:var(--cyan-dim);text-transform:uppercase;}
+  aside h2{font-size:17px;font-weight:700;letter-spacing:.06em;margin:10px 0 4px;}
+  aside .ver{font-size:11px;color:var(--ink3);letter-spacing:.1em;}
+  .metaBox{margin:22px 0;padding:12px 14px;background:var(--panel);border:1px solid var(--line);border-radius:4px;}
+  .metaBox div{display:flex;justify-content:space-between;font-size:11.5px;padding:4px 0;color:var(--ink3);letter-spacing:.05em;}
+  .metaBox b{color:var(--ink2);font-weight:600;}
+  aside .tocT{font-size:10px;letter-spacing:.3em;color:var(--cyan-dim);margin:24px 0 10px;}
+  aside ol{list-style:none;counter-reset:c;}
+  aside ol li{counter-increment:c;}
+  aside ol a{
+    display:block;padding:6px 10px;border-left:2px solid transparent;
+    color:var(--ink3);text-decoration:none;font-size:12.5px;transition:.18s;
+  }
+  aside ol a::before{content:counter(c,decimal-leading-zero) "  ";color:var(--cyan-dim);font-size:10px;}
+  aside ol a:hover{color:var(--cyan);border-left-color:var(--cyan);background:rgba(127,233,255,.05);}
+
+  /* ---------- 主体 ---------- */
+  main{flex:1;min-width:0;padding:44px 44px 120px;}
+  .docHead{border-bottom:1px solid var(--line);padding-bottom:26px;margin-bottom:38px;}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+  .chip{
+    font-size:10.5px;letter-spacing:.16em;padding:4px 11px;border-radius:12px;
+    border:1px solid var(--line2);color:var(--cyan);background:rgba(127,233,255,.07);
+  }
+  .chip.g{border-color:rgba(89,226,168,.4);color:var(--done);background:rgba(89,226,168,.07);}
+  .chip.y{border-color:rgba(255,193,77,.4);color:var(--p1);background:rgba(255,193,77,.07);}
+  .docHead h1{font-size:34px;font-weight:800;letter-spacing:.1em;line-height:1.3;}
+  .docHead .sub{margin-top:10px;color:var(--ink2);font-size:14px;line-height:2;max-width:760px;}
+
+  section{margin:0 0 54px;scroll-margin-top:24px;}
+  h3{
+    font-size:21px;font-weight:700;letter-spacing:.08em;margin-bottom:6px;
+    display:flex;align-items:center;gap:12px;
+  }
+  h3 span.no{font-size:11px;letter-spacing:.3em;color:var(--cyan-dim);}
+  h4{font-size:15.5px;font-weight:700;margin:26px 0 10px;color:var(--cyan);letter-spacing:.05em;}
+  h5{font-size:13.5px;font-weight:700;margin:18px 0 8px;color:var(--ink);letter-spacing:.04em;}
+  p{margin-bottom:13px;color:var(--ink2);}
+  p.oneline{color:var(--ink);}
+  strong{color:#fff;font-weight:700;}
+  em{font-style:normal;color:var(--cyan);font-weight:600;}
+
+  /* ---------- 表格 ---------- */
+  table{width:100%;border-collapse:collapse;margin:14px 0 8px;font-size:13px;}
+  th,td{padding:10px 13px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;}
+  th{background:var(--panel2);color:var(--cyan-dim);font-size:10.5px;letter-spacing:.16em;font-weight:600;white-space:nowrap;}
+  td{color:var(--ink2);}
+  td b,th b{color:#fff;}
+  tbody tr:hover td{background:rgba(127,233,255,.035);}
+  td.id{color:var(--cyan-dim);font-variant-numeric:tabular-nums;white-space:nowrap;}
+
+  /* ---------- 徽章 ---------- */
+  .b{display:inline-block;font-size:10px;letter-spacing:.12em;padding:2px 8px;border-radius:3px;white-space:nowrap;font-weight:600;}
+  .b.p0{color:var(--p0);background:rgba(255,90,77,.12);border:1px solid rgba(255,90,77,.35);}
+  .b.p1{color:var(--p1);background:rgba(255,193,77,.12);border:1px solid rgba(255,193,77,.35);}
+  .b.p2{color:var(--p2);background:rgba(111,139,160,.12);border:1px solid rgba(111,139,160,.3);}
+  .b.done{color:var(--done);background:rgba(89,226,168,.1);border:1px solid rgba(89,226,168,.32);}
+  .b.part{color:var(--part);background:rgba(255,193,77,.1);border:1px solid rgba(255,193,77,.32);}
+  .b.plan{color:var(--plan);background:rgba(135,151,168,.1);border:1px solid rgba(135,151,168,.28);}
+
+  /* ---------- 代码 ---------- */
+  pre{
+    background:var(--panel);border:1px solid var(--line);border-radius:4px;
+    padding:14px 16px;margin:14px 0;overflow-x:auto;
+    font-family:"SF Mono",Menlo,Consolas,"Courier New",monospace;
+    font-size:12px;line-height:1.75;color:#a8c8d8;
+  }
+  pre b{color:var(--cyan);font-weight:600;}
+  pre .cm{color:#5a7590;}
+  code{
+    font-family:"SF Mono",Menlo,Consolas,monospace;font-size:12.5px;
+    background:rgba(127,233,255,.08);padding:1px 6px;border-radius:3px;color:var(--cyan);
+  }
+
+  /* ---------- 架构分层图 ---------- */
+  .arch{display:flex;flex-direction:column;gap:6px;margin:16px 0;}
+  .arch .layer{display:flex;align-items:baseline;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:10px 16px;}
+  .arch .layer.hl{border-color:var(--line2);background:var(--panel2);}
+  .arch .layer .name{font-size:12.5px;font-weight:700;color:var(--cyan);letter-spacing:.06em;width:170px;flex:none;}
+  .arch .layer .mods{font-size:12.5px;color:var(--ink2);}
+  .arch .arrow{text-align:center;color:var(--cyan-dim);font-size:12px;line-height:1;}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin:16px 0 8px;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:16px 18px;}
+  .card .h{font-size:13.5px;font-weight:700;color:#fff;margin-bottom:8px;letter-spacing:.05em;}
+  .card .v{font-size:26px;font-weight:800;color:var(--cyan);font-variant-numeric:tabular-nums;line-height:1.2;}
+  .card .d{font-size:12px;color:var(--ink3);margin-top:6px;line-height:1.75;}
+
+  /* ---------- 循环图 ---------- */
+  .loop{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:14px 0;padding:18px;
+    background:var(--panel);border:1px solid var(--line);border-radius:5px;}
+  .loop .n{padding:8px 14px;border:1px solid var(--line2);border-radius:3px;background:var(--panel2);
+    font-size:12.5px;color:var(--cyan);letter-spacing:.05em;white-space:nowrap;}
+  .loop .a{color:var(--cyan-dim);font-size:14px;}
+
+  .note{border-left:3px solid var(--cyan);background:rgba(127,233,255,.05);padding:13px 18px;margin:16px 0;border-radius:0 4px 4px 0;}
+  .note .t{font-size:11px;letter-spacing:.22em;color:var(--cyan);font-weight:700;margin-bottom:6px;}
+  .note p{margin:0;font-size:13.5px;}
+
+  .warnnote{border-left:3px solid var(--p1);background:rgba(255,193,77,.05);padding:13px 18px;margin:16px 0;border-radius:0 4px 4px 0;}
+  .warnnote .t{font-size:11px;letter-spacing:.22em;color:var(--p1);font-weight:700;margin-bottom:6px;}
+  .warnnote p{margin:0;font-size:13.5px;}
+
+  .kv{display:grid;grid-template-columns:150px 1fr;gap:0;margin:14px 0;border:1px solid var(--line);border-radius:5px;overflow:hidden;}
+  .kv div{padding:10px 16px;border-bottom:1px solid var(--line);font-size:13px;}
+  .kv div:nth-child(odd){background:var(--panel2);color:var(--cyan-dim);font-size:11px;letter-spacing:.14em;}
+  .kv div:nth-last-child(1),.kv div:nth-last-child(2){border-bottom:none;}
+
+  ul.plain{margin:10px 0 12px;padding-left:20px;}
+  ul.plain li{color:var(--ink2);font-size:13.5px;margin-bottom:7px;}
+  ul.plain li b{color:#fff;}
+
+  footer{border-top:1px solid var(--line);margin-top:60px;padding-top:20px;
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;
+    font-size:11px;letter-spacing:.18em;color:#4f6a7c;}
+
+  @media (max-width:1000px){
+    aside{display:none;}
+    main{padding:30px 20px 90px;}
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <aside>
+    <div class="docTag">TECHNICAL DESIGN</div>
+    <h2>雷隙 THUNDERGAP</h2>
+    <div class="ver">技术方案 v0.1</div>
+
+    <div class="metaBox">
+      <div><span>文档状态</span><b>评审中</b></div>
+      <div><span>版本</span><b>v0.1</b></div>
+      <div><span>更新日期</span><b>2026-10-28</b></div>
+      <div><span>对应阶段</span><b>M0 已交付 · M1–M4 规划</b></div>
+      <div><span>上游文档</span><b>PRD v0.1</b></div>
+      <div><span>当前形态</span><b>零构建单文件原型</b></div>
+    </div>
+
+    <div class="tocT">目录</div>
+    <ol>
+      <li><a href="#s1">方案概述</a></li>
+      <li><a href="#s2">总体架构</a></li>
+      <li><a href="#s3">渲染管线与光照</a></li>
+      <li><a href="#s4">程序化世界生成</a></li>
+      <li><a href="#s5">GPU 雨幕与涟漪</a></li>
+      <li><a href="#s6">闪电与落雷系统</a></li>
+      <li><a href="#s7">回声脉冲与收集</a></li>
+      <li><a href="#s8">角色控制与自研物理</a></li>
+      <li><a href="#s9">程序化音频</a></li>
+      <li><a href="#s10">HUD 与屏幕后期</a></li>
+      <li><a href="#s11">游戏状态与主循环</a></li>
+      <li><a href="#s12">性能预算与技术债</a></li>
+      <li><a href="#s13">演进路线（M1–M4）</a></li>
+      <li><a href="#s14">测试与风险</a></li>
+    </ol>
+  </aside>
+
+  <main>
+    <div class="docHead">
+      <div class="chips">
+        <span class="chip">技术方案 v0.1</span>
+        <span class="chip g">M0 原型已交付</span>
+        <span class="chip y">评审中</span>
+        <span class="chip">上游：PRD v0.1</span>
+      </div>
+      <h1>《雷隙 THUNDERGAP》技术方案</h1>
+      <p class="sub">
+        本文是 PRD v0.1 的技术配套文档：完整描述 M0 原型的实现方案（渲染、程序化生成、GPU 雨幕、
+        自研物理、程序化音频、DOM 后期），盘点性能预算与技术债，
+        并给出 M1–M4 各阶段的关键技术选型与演进路线。文中数值均以 <em>index.html</em> 当前代码为准。
+      </p>
+    </div>
+
+    <!-- 01 -->
+    <section id="s1">
+      <h3><span class="no">01</span>方案概述</h3>
+
+      <h4>技术目标</h4>
+      <p>技术方案服务于 PRD 第 04 节的指标，可归纳为四条：</p>
+      <ul class="plain">
+        <li><b>零门槛进入：</b>双击 index.html 即可游玩，无构建、无服务器、无网络请求（three.js 已本地化），首屏可玩 &lt; 3 秒。</li>
+        <li><b>氛围可承载：</b>14000 条雨丝 + 动态闪电 + 指数雾在 1080p 中端 GPU 上稳定 ≥ 55 fps，支撑「一发脉冲点亮全城」的核心画面。</li>
+        <li><b>机制可调：</b>落雷频率、穹顶曲线、共鸣经济等全部收敛为可查表的数值，平衡测试不改结构。</li>
+        <li><b>可演进：</b>M1–M4 的模块化拆分、真实反射、自适应降级、移动端适配都有明确挂点，不需要推翻原型。</li>
+      </ul>
+
+      <h4>硬约束</h4>
+      <div class="kv">
+        <div>分发形态</div><div>静态文件目录（index.html + js/three.min.js），无构建步骤，file:// 协议可直接运行</div>
+        <div>外部依赖</div><div>仅 three.js 一个本地文件，锁定版本；无字体、音频、贴图等任何外部资产</div>
+        <div>音频</div><div>WebAudio 全程序化合成，音频资产为零</div>
+        <div>贴图</div><div>窗格 / 假阴影为运行时 Canvas 生成，纹理资产为零</div>
+        <div>物理</div><div>自研圆柱 vs AABB 推出，不引入第三方物理引擎</div>
+        <div>目标平台</div><div>桌面浏览器（Chrome / Edge / Firefox / Safari），WebGL；移动端为 M3 目标</div>
+      </div>
+
+      <h4>技术原则</h4>
+      <ul class="plain">
+        <li><b>CPU 让位 GPU。</b>凡是「大量、重复、有规律」的运动（雨丝下落、涟漪扩散）全部放进顶点着色器或 InstancedMesh，主循环只更新 uniform。</li>
+        <li><b>程序化优先于资产。</b>城市、窗格、闪电折线、雷声、涟漪全部运行时生成——零资产换来零加载与无限随机布局。</li>
+        <li><b>后期走 DOM，不走后处理管线。</b>闪白、受伤红晕、暗角、镜头水痕全部是 CSS 叠加层（<code>mix-blend-mode: screen</code> + 渐变），省掉整套 EffectComposer 的成本与复杂度。</li>
+        <li><b>数值即代码即文档。</b>所有可调参数集中在常量与 <code>state</code>，与 PRD 第 07 节数值表一一对应。</li>
+      </ul>
+    </section>
+
+    <!-- 02 -->
+    <section id="s2">
+      <h3><span class="no">02</span>总体架构</h3>
+
+      <h4>技术栈</h4>
+      <div class="kv">
+        <div>引擎</div><div>three.js（本地化 three.min.js，锁版本，离线可用）</div>
+        <div>渲染 API</div><div>WebGL（three.js WebGLRenderer，sRGB 输出 + ACES Filmic 色调映射）</div>
+        <div>语言</div><div>原生 JavaScript（ES5 风格 IIFE，无框架、无模块系统、无 TS）</div>
+        <div>UI</div><div>原生 DOM + CSS（HUD、覆盖卡、字幕、后期层）</div>
+        <div>音频</div><div>WebAudio 原生节点图</div>
+      </div>
+
+      <h4>单文件分层结构</h4>
+      <p>原型阶段全部代码位于 index.html 的一个 IIFE 内（约 1400 行），内部按职责分为六层，
+      层间只通过 <code>state</code>、全局数组与 three.js 场景图通信：</p>
+
+      <div class="arch">
+        <div class="layer hl"><span class="name">UI / 后期层</span><span class="mods">HUD 面板 · #vignette / #flash / #hurt / #drops 叠加层 · 字幕 say() · 覆盖卡 endCard()</span></div>
+        <div class="arrow">▲ 读写 DOM / state</div>
+        <div class="layer"><span class="name">玩法逻辑层</span><span class="mods">updatePlayer · updateFragments · updateGoal · spawnStrike / detonate · emitPulse · 胜负判定</span></div>
+        <div class="arrow">▲ 每帧 tick 调度</div>
+        <div class="layer"><span class="name">主循环层</span><span class="mods">tick()（setAnimationLoop）· clock.getDelta（钳制 0.05s）· 三条穹顶驱动曲线的定时器</span></div>
+        <div class="arrow">▲ 消费世界与状态</div>
+        <div class="layer"><span class="name">表现更新层</span><span class="mods">updateCamera · updateFx（闪电衰减 / 脉冲扩散 / 涟漪矩阵 / 警示环呼吸）· updateHud</span></div>
+        <div class="arrow">▲ 操作场景图</div>
+        <div class="layer"><span class="name">世界构建层</span><span class="mods">buildSky · buildLights · buildGround · buildCity · buildTower · buildRain · buildRipples · buildPlayer · buildFragments</span></div>
+        <div class="arrow">▲ 底层服务</div>
+        <div class="layer"><span class="name">平台服务层</span><span class="mods">renderer / scene / camera · 自研碰撞 collide() · WebAudio 节点图（initAudio + 六个播放函数）· 输入（键盘 / 指针锁定）</span></div>
+      </div>
+
+      <h4>主循环时序</h4>
+      <div class="loop">
+        <span class="n">dt = min(0.05, getDelta)</span><span class="a">→</span>
+        <span class="n">穹顶进度推进</span><span class="a">→</span>
+        <span class="n">玩家 / 碎片 / 目标</span><span class="a">→</span>
+        <span class="n">HUD</span><span class="a">→</span>
+        <span class="n">闪电 & 落雷定时器</span><span class="a">→</span>
+        <span class="n">相机</span><span class="a">→</span>
+        <span class="n">特效</span><span class="a">→</span>
+        <span class="n">render</span>
+      </div>
+      <p>
+        开始前（title 界面）与结束后（结算卡）只运行「相机 + 特效 + 渲染」，玩法更新整体短路——
+        菜单背景就是活的雨夜城市，这是「氛围先行」在架构上的体现。
+        dt 钳制在 50ms，防止后台切回标签页时的一帧大步长穿透楼体或跳过预警。
+      </p>
+
+      <h4>代码组织演进决策</h4>
+      <p>M0 的单文件形态是<b>有意为之</b>：零构建约束下 file:// 协议无法使用 ES Modules（CORS 限制），
+      打包器又会杀死「双击即玩」。M1 起拆分为多个 <code>&lt;script&gt;</code> 顺序加载的命名空间模块
+      （详见第 13 节选型 D1），拆分边界即上图的六层。</p>
+    </section>
+
+    <!-- 03 -->
+    <section id="s3">
+      <h3><span class="no">03</span>渲染管线与光照</h3>
+
+      <h4>Renderer 配置</h4>
+      <div class="kv">
+        <div>抗锯齿</div><div>MSAA 开启（antialias: true），powerPreference: high-performance</div>
+        <div>像素比</div><div>min(devicePixelRatio, 1.85) —— 上限钳制，4K 屏不做全分辨率渲染</div>
+        <div>色彩</div><div>sRGBEncoding 输出 + ACESFilmicToneMapping（exposure 1.06）</div>
+        <div>雾</div><div>FogExp2(0x060a14, 0.0135)，是「黑暗压城」氛围的第一承担者</div>
+        <div>相机</div><div>PerspectiveCamera，fov 62 / near 0.1 / far 900</div>
+        <div>实时阴影</div><div>关闭。主角用 Canvas 径向渐变贴地假阴影（FR-03 类似的「近似换性能」策略）</div>
+      </div>
+
+      <h4>天空穹顶（自定义着色器）</h4>
+      <p>半径 500 的反面球体，片元着色器按高度做三段色带插值（地平线紫 → 中层蓝 → 顶部近黑），
+      并叠加 <code>uFlash</code> 闪电提亮项（高处增亮更多，模拟云层反射）。球体每帧跟随相机，天空永远「够远」。</p>
+<pre><span class="cm">// 片元核心：h 为归一化高度，uFlash ∈ [0, 0.5]</span>
+vec3 c = mix(uHorizon, uMid, smoothstep(0.42, 0.62, h));
+c     = mix(c, uTop,  smoothstep(0.60, 0.95, h));
+c    += uFlash * vec3(0.55, 0.68, 0.85) * (0.35 + 0.65 * h);</pre>
+
+      <h4>灯光编组（仅 4 盏 + 2 类随灯光）</h4>
+      <table>
+        <thead><tr><th style="width:170px">灯</th><th style="width:110px">类型</th><th>职责与强度曲线</th></tr></thead>
+        <tbody>
+          <tr><td><b>环境光</b> 0x2a3a55</td><td>Ambient</td><td>常驻底光 0.55；闪电瞬间冲到 1.5 / 2.4，按 3.2/s 衰减回落</td></tr>
+          <tr><td><b>半球光</b> 天蓝/地黑</td><td>Hemisphere</td><td>常驻 0.5，给楼体顶面与地面拉开明暗层次</td></tr>
+          <tr><td><b>闪电方向光</b> 0xcfe6ff</td><td>Directional</td><td>平时 0；环境闪电时移位到落点上方、强度 2.6–4.8；落雷引爆时 6</td></tr>
+          <tr><td><b>脉冲点光</b> 0x7fe9ff</td><td>Point</td><td>回声脉冲的扩散光源，intensity 16 × (1−k) 随扩散衰减，distance 随半径增长</td></tr>
+          <tr><td>主角随身光</td><td>Point</td><td>0x9fe4ff，0.55 / 距离 9，保证主角在纯黑中始终可见（可读性兜底）</td></tr>
+          <tr><td>碎片光 ×8</td><td>Point</td><td>随显形状态 0 ↔ 3.2 渐变，与脉冲「照亮」联动</td></tr>
+        </tbody>
+      </table>
+
+      <h4>材质策略</h4>
+      <table>
+        <thead><tr><th style="width:170px">对象</th><th>方案</th></tr></thead>
+        <tbody>
+          <tr><td>地面</td><td>Standard，color 0x080c15 / roughness 0.24 / metalness 0.92 —— 高金属低粗糙是「湿地沥青」反光的全部秘密</td></tr>
+          <tr><td>积水潭 ×26</td><td>roughness 0.05 / metalness 1.0 的圆片，闪电时整片提亮（简化高光，真实反射见第 13 节选型 D2）</td></tr>
+          <tr><td>楼体</td><td>Standard + <b>自发光窗格贴图</b>（emissive 0xffc98a，intensity 0.85）：黑暗中楼体的信息密度全部来自自发光，不依赖任何灯</td></tr>
+          <tr><td>发光元素</td><td>碎片 / 光柱 / 冲击波 / 预警环用 MeshBasicMaterial + AdditiveBlending——自发光体不需要参与光照计算</td></tr>
+          <tr><td>雨幕 / 脉冲壳</td><td>ShaderMaterial / Basic + Additive + depthWrite:false，透明体互相叠加不出排序瑕疵</td></tr>
+        </tbody>
+      </table>
+
+      <div class="note">
+        <div class="t">设计取舍</div>
+        <p>「黑暗中的可见性」由三层兜底：自发光窗格（城市）、随身光（主角）、闪电方向光（全局）。
+        任何时刻玩家至少能看到一种光源的信息，这是 FR-13「过暗劝退」风险的技术对策。</p>
+      </div>
+    </section>
+
+    <!-- 04 -->
+    <section id="s4">
+      <h3><span class="no">04</span>程序化世界生成</h3>
+
+      <h4>城市生成算法（buildCity）</h4>
+      <ul class="plain">
+        <li><b>网格步进：</b>以 24m 步长在 ±95m（CITY/2）范围内双重循环，每个格点尝试生成一栋楼。</li>
+        <li><b>跳过规则：</b>① 中央 36×36m 留给广播塔广场；② 四角 26m 内留白（防止边角死区）；③ 16% 概率空地——空地是玩家实际的可通行捷径，不是浪费。</li>
+        <li><b>楼体参数分布：</b>宽/深 9–15m 均匀分布；高 <code>10 + pow(rand, 1.7) × 58</code> ——幂律让矮楼多、高楼少，天际线自然；位置抖动 ±1.5m 打破网格感。</li>
+        <li><b>碰撞盒同步：</b>生成楼体的同时向 <code>boxes[]</code> 推入 AABB {minX, maxX, minZ, maxZ, h}，物理与渲染天然一致，无需后期从 Mesh 反推。</li>
+        <li><b>屋顶警示灯：</b>h &gt; 40m 的楼以 70% 概率挂红色闪灯（相位随机），兼作高空地标。</li>
+      </ul>
+
+      <h4>窗格纹理（运行时 Canvas）</h4>
+      <p>64×128 的 Canvas 上以 13×11px 步进画窗，每扇 42% 概率点亮，点亮色在三档色温（暖橙 / 暖白 / 冷白）中随机；
+      作为 <b>emissiveMap</b> 而非 diffuseMap 使用，RepeatWrapping 按楼体尺寸平铺。
+      一张贴图服务全城楼体（材质共享），纹理内存几乎为零。</p>
+
+      <h4>六面 UV 适配（scaleBoxUV）</h4>
+      <p>BoxGeometry 的 24 个顶点按 +X/−X/+Y/−Y/+Z/−Z 六面分组，侧面 UV 按 <code>尺寸/3.2m × 高/3.4m</code> 设置重复次数，
+      保证窗格在世界空间中始终是约 3m 一层的等大格子；顶/底两面 UV 归零，屋顶不显示窗格。</p>
+
+      <h4>广播塔（终点）</h4>
+      <p>组合体：4 根微倾圆柱塔腿 + 7 道环 + 桅杆 + 红色信标 + <b>130m 高的加法混合导航光柱</b>（opacity 0.09，
+      全城任意角度可见的终点地标）+ 塔基平台与闸门。塔基同时向 <code>boxes[]</code> 推入碰撞盒（不可穿越，
+      胜利判定走距离 9.2m 触发而非穿入）。</p>
+
+      <h4>碎片布点与 freeSpot 重定位</h4>
+      <p>8 片碎片有 8 个手工预设锚点（保证相对塔的方位分布），但锚点可能落在随机生成的楼体内部，
+      因此用 <b>向日葵螺旋</b>（黄金角 2.399 rad，步进 1.7m，最多 60 次尝试）向外搜索第一个
+      「不与任何碰撞盒相交（留 2.4m 余量）、不在广场、不出城」的落点。
+      该函数同样可用于未来任何「必须生成在可通行区」的对象。</p>
+
+      <div class="warnnote">
+        <div class="t">已知缺口 · 随机数不可复现</div>
+        <p>当前全部使用 <code>Math.random()</code>，同一布局无法复现——玩家报了一个「卡进楼里」的问题时无法重建现场，
+        埋点也无法关联具体布局。M1 改为<b>可播种 PRNG</b>（mulberry32 一类的 15 行实现），
+        seed 写入 run_end 埋点与结算卡，作为「本局编号」。</p>
+      </div>
+    </section>
+
+    <!-- 05 -->
+    <section id="s5">
+      <h3><span class="no">05</span>GPU 雨幕与涟漪</h3>
+
+      <h4>雨幕：位置完全在顶点着色器计算（FR-02）</h4>
+      <p>14000 条雨丝 = 28000 个顶点的 LineSegments。CPU 在初始化后<b>每帧只写 3 个 uniform</b>（uTime / uCam / uBright），
+      位置、循环、风偏移、相机跟随全部在 GPU 完成：</p>
+
+      <h5>数据布局</h5>
+      <table>
+        <thead><tr><th style="width:130px">属性</th><th style="width:110px">布局</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td><code>aSeed</code></td><td>vec3 × 2 顶点</td><td>雨滴初始种子（同一雨丝的两个端点共享，是全部随机性的来源）</td></tr>
+          <tr><td><code>aSpeed</code></td><td>float × 2</td><td>下落速度 17–30 m/s</td></tr>
+          <tr><td><code>aEnd</code></td><td>float × 2</td><td>0 = 雨滴头，1 = 拖尾端</td></tr>
+        </tbody>
+      </table>
+
+      <h5>顶点着色器核心</h5>
+<pre><span class="cm">// 1. 循环下落：mod 让雨滴永远落在 [0, 46m] 窗口内</span>
+float fall = <b>mod</b>(aSeed.y - uTime * aSpeed, uHeight);
+p.y = fall;
+<span class="cm">// 2. 风偏移：越接近地面偏得越多（(高度-当前位置)×系数）</span>
+p.x += uWind.x * (uHeight - fall) * 0.06;
+p.z += uWind.y * (uHeight - fall) * 0.06;
+<span class="cm">// 3. 拖尾：尾端点向下偏移，长度与速度成正比（快雨长尾）</span>
+p.y -= aEnd * (0.55 + aSpeed * 0.035);
+<span class="cm">// 4. 相机跟随：对「相对相机的偏移」取 mod，雨幕无限平铺在世界中</span>
+vec3 rel = p - uCam;
+rel.x = <b>mod</b>(rel.x + uArea * 0.5, uArea) - uArea * 0.5;
+rel.z = <b>mod</b>(rel.z + uArea * 0.5, uArea) - uArea * 0.5;</pre>
+
+      <p>关键点是第 4 步：<b>雨的种子位置是固定的，移动的只是 110×110m 的取景窗口</b>——
+      相机走到哪，窗口就 wrap 到哪，14000 条雨永远「够用」，不需要粒子重生逻辑。
+      <code>frustumCulled = false</code> 关闭视锥剔除（雨包围球永远覆盖相机，剔除只会带来闪烁）。</p>
+
+      <h5>联动</h5>
+      <ul class="plain">
+        <li><b>闪电联动：</b>uBright 冲到 1.0 后按 1.6/s 回落到基线（0.32 + 穹顶进度 × 0.25）——雨丝颜色与透明度整体提亮，雨幕在闪电瞬间「显形」。</li>
+        <li><b>穹顶联动：</b>基线亮度与雨声音量随穹顶进度同步上升，视觉与听觉共享同一条曲线。</li>
+      </ul>
+
+      <h4>涟漪：InstancedMesh + 每帧 CPU 矩阵（340 实例）</h4>
+      <p>单几何体（RingGeometry 0.10–0.17）实例化 340 份，涟漪在相机周围 70m 内随机重生，
+      生命期 0.45–1.15s，缩放 0.4 → 2.8、透明度随寿命衰减，instanceColor 控制青色调与穹顶强度。
+      这是全场景唯一每帧写 instanceMatrix 的系统，成本约 340 次 4×4 矩阵写入，实测可忽略，
+      但它是第 12 节「降级档位」的 first cut 对象。</p>
+    </section>
+
+    <!-- 06 -->
+    <section id="s6">
+      <h3><span class="no">06</span>闪电与落雷系统</h3>
+
+      <p>系统刻意分为两类：<b>环境闪电</b>是舞台灯光与免费视野（PRD FR-04），<b>威胁落雷</b>才是敌人（FR-11）。
+      两者共用折线生成器，语义完全不同。</p>
+
+      <table>
+        <thead><tr><th style="width:150px">维度</th><th>环境闪电 atmosphericBolt</th><th>威胁落雷 spawnStrike / detonate</th></tr></thead>
+        <tbody>
+          <tr><td>位置</td><td>全城随机（±CITY×0.7），云层 90–130m 高处入地</td><td>玩家 6–22m 环带内，钳制在城内</td></tr>
+          <tr><td>预告</td><td>无——它本身就是照明与路标</td><td>红色预警环（呼吸脉动 sin(t×16)），1.35s 后落雷</td></tr>
+          <tr><td>伤害</td><td>无</td><td>d &lt; 1.9m 中心 42 / d &lt; 3.6m 外圈 20，击退 + 0.9s 无敌帧</td></tr>
+          <tr><td>视听</td><td>天空 uFlash + 环境光抬升 + 距离延迟雷声（0–2.2s）</td><td>闪白拉满 1.0 + 相机震动 0.85 + 冲击波环 + 零延迟轰鸣 + 64→24Hz 低频冲击</td></tr>
+          <tr><td>频率</td><td>max(0.8, 4.2 − storm×3.0) × (0.4+rand) 秒</td><td>max(1.5, 6.2 − storm×4.4) × (0.65+rand×0.7) 秒；storm&gt;0.55 时 50% 双发，&gt;0.85 追加 40% 三发</td></tr>
+        </tbody>
+      </table>
+
+      <h4>折线闪电生成（makeBoltPath / spawnBolt）</h4>
+      <p>两端点间线性插值 14 段，中间点叠加随机抖动（主脉 jitter，支线 ×1.5）；
+      用<b>两条叠加的 Line</b>（副线透明度 0.5、路径不同）模拟辉光粗细——不引入宽线扩展或 Billboard，
+      0.23s 生命周期内肉眼足够。闪电死亡时逐个 dispose geometry/material，防止长局内存增长。</p>
+
+      <h4>落雷状态机</h4>
+      <div class="loop">
+        <span class="n">spawn：预警环 + 内圈</span><span class="a">→</span>
+        <span class="n">WARN 1.35s：环呼吸脉动</span><span class="a">→</span>
+        <span class="n">detonate：闪电柱 + 伤害/击退 + 冲击波</span><span class="a">→</span>
+        <span class="n">FADE 1.4s：环淡出 → 回收</span>
+      </div>
+
+      <h4>伤害结算要点</h4>
+      <ul class="plain">
+        <li>距离用 2D 平面距离（hypot），忽略高度差——跳起不躲雷，避免「跳跃无敌」漏洞。</li>
+        <li>无敌帧（0.9s）在结算入口检查，多连发雷最多吃一发，对应 PRD「防止瞬间秒杀」的数值约束。</li>
+        <li>击退向量 = 玩家相对落点的单位方向 × 9，附加竖直 5.2 的抛起——击退同时是「把玩家推出预警环」的纠错机制。</li>
+      </ul>
+
+      <h4>三条穹顶驱动曲线汇总</h4>
+      <table>
+        <thead><tr><th style="width:200px">曲线</th><th>公式（storm ∈ [0,1]）</th></tr></thead>
+        <tbody>
+          <tr><td>环境闪电间隔</td><td>max(0.8, 4.2 − 3.0·storm) × (0.4 + rand)</td></tr>
+          <tr><td>落雷间隔</td><td>max(1.5, 6.2 − 4.4·storm) × (0.65 + 0.7·rand)，叠加双发/三发概率</td></tr>
+          <tr><td>雨幕亮度基线 / 雨声音量</td><td>0.32 + 0.25·storm ／ 0.09 + 0.13·storm</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 07 -->
+    <section id="s7">
+      <h3><span class="no">07</span>回声脉冲与收集（FR-08 / FR-09）</h3>
+
+      <h4>脉冲的视觉三件套</h4>
+      <table>
+        <thead><tr><th style="width:170px">元素</th><th>方案</th></tr></thead>
+        <tbody>
+          <tr><td>地面扩散环</td><td>RingGeometry 加法混合，42 m/s 匀速扩散至 34m，透明度线性衰减</td></tr>
+          <tr><td>半球扩散壳</td><td>半透 wireframe 半球，0.9× 半径同步膨胀——给「声呐」以体积感</td></tr>
+          <tr><td>随身点光</td><td>pulseLight intensity 16×(1−k)，distance 随半径增长——扫过处楼体被真实照亮</td></tr>
+        </tbody>
+      </table>
+
+      <h4>「照亮」的判定模型</h4>
+      <p>脉冲不是灯光渐变，而是一个<b>移动的球形波前</b>：每帧检查所有未拾取碎片，
+      满足 <code>|dist(碎片, 玩家) − 波前半径| &lt; 4.5m</code> 即判定「被波前扫过」，碎片显形计时器置 5s。
+      这是一个 O(碎片数) 的纯数学判定，与「光锥照射」相比无需射线检测，且语义更接近声呐（隔墙也能感知）。</p>
+
+      <h4>碎片显形与拾取</h4>
+      <ul class="plain">
+        <li><b>双通道显形：</b>被脉冲扫过（lit 5s）或玩家进入 14m 常显半径——近处碎片不会因为没脉冲而隐形。</li>
+        <li><b>显形渐变：</b>核心/线框笼/指引光柱/点光四个属性用同一帧率无关的 lerp（dt×5）趋近目标值，显形与熄灭都无跳变。</li>
+        <li><b>拾取：</b>水平距离 2.4m 判定（试玩轮由 3D 1.7m 放宽）→ 计数 +10% 穹顶回退 +6 HP → 播放拾取音 + 无线电底噪 → 字幕推进叙事（八段固定顺序）。</li>
+      </ul>
+
+      <h4>共鸣经济</h4>
+      <div class="loop">
+        <span class="n">上限 100</span><span class="a">→</span>
+        <span class="n">脉冲 −25</span><span class="a">→</span>
+        <span class="n">回复 7.5/s（3.3s 回满一次）</span><span class="a">→</span>
+        <span class="n">满值 4 连发</span><span class="a">↺</span>
+      </div>
+      <p>不足 25 时脉冲被拒绝并给出字幕提示（「共鸣值不足——等它回满」），机制数值全部集中在
+      <code>state.resonance</code> 一处，平衡调优只动三个常量。</p>
+    </section>
+
+    <!-- 08 -->
+    <section id="s8">
+      <h3><span class="no">08</span>角色控制与自研物理（FR-05 / FR-06）</h3>
+
+      <h4>输入映射</h4>
+      <table>
+        <thead><tr><th style="width:150px">输入</th><th>行为</th></tr></thead>
+        <tbody>
+          <tr><td>WASD</td><td>相对相机水平面的移动方向（yaw 旋转后归一化）</td></tr>
+          <tr><td>方向键 ←→</td><td>备选转向方案（1.7 rad/s），供不愿用鼠标的玩家</td></tr>
+          <tr><td>Shift</td><td>疾跑 8.6 m/s（行走 5.0）；穹顶 &gt; 75% 时统一 ×0.94</td></tr>
+          <tr><td>空格</td><td>跳跃 v₀ = 7.4，重力 23 m/s²，着地即回零（土狼时间/跳跃缓冲未做，M1 评估）</td></tr>
+          <tr><td>E</td><td>回声脉冲</td></tr>
+          <tr><td>鼠标</td><td>Pointer Lock：yaw −0.0024/px，pitch 0.0018/px，钳制 [−0.15, 0.78]</td></tr>
+          <tr><td>M / R</td><td>静音（master gain 0/0.9）／整页重开（location.reload）</td></tr>
+        </tbody>
+      </table>
+
+      <h4>移动积分</h4>
+      <p>速度不直接赋值，而是向目标速度做帧率无关的指数趋近（系数 dt×9）——自带惯性起停，
+      也是击退冲量能自然衰减回行走状态的原因。竖直方向独立积分（重力 → 位置 → 地面钳制）。</p>
+
+      <h4>碰撞：圆柱 vs AABB 最小穿透轴推出（collide）</h4>
+<pre><span class="cm">// 对每个碰撞盒：先 AABB 相交粗测（圆近似为方），再取四个方向穿透深度的最小值推出</span>
+dl = (p.x + r) - b.minX;  dr = b.maxX - (p.x - r);
+db = (p.z + r) - b.minZ;  dt = b.maxZ - (p.z - r);
+m  = min(dl, dr, db, dt);   <span class="cm">// 沿最小穿透轴位移，相当于滑墙</span></pre>
+      <p>推论与已知边界：</p>
+      <ul class="plain">
+        <li>逐盒顺序求解天然支持「滑墙」手感（贴墙移动不被卡死）；但凸凸重叠的楼间缝隙可能产生推挤抖动——当前布局楼间距 ≥ 9m，实际不会触发。</li>
+        <li>圆近似为方（AABB 膨胀），转角碰撞比真圆略「方」——对 0.5m 半径的第三人称视角不可感，不值得换圆 vs AABB 的三角函数解。</li>
+        <li>只解水平面，竖直方向只有地面一个平面——楼顶不可站（PRD 明确楼体实心不可攀爬，这是约束不是缺陷）。</li>
+      </ul>
+
+      <h4>程序化角色动画</h4>
+      <p>无骨骼、无动画文件。runPhase 以 <code>dt × (3.2 + speed×1.5)</code> 累进（速度越快步频越高），
+      腿臂反相正弦摆动（臂幅 ×0.8）、身体 bob、围巾随速度后飘并叠加慢速正弦、裙摆 z 向摆动。
+      全部是一阶正弦函数，但叠加之后「雨夜奔跑」的节奏感成立；受击/拾取/结局等状态动画缺口见第 13 节选型 D3。</p>
+
+      <h4>相机（FR-06）</h4>
+      <ul class="plain">
+        <li><b>球坐标跟随：</b>目标点 = 玩家 +1.55m，半径 7.2m，yaw/pitch 定位后 lerp（dt×7）平滑追踪。</li>
+        <li><b>避障：</b>从目标点向期望机位做 Raycaster 检测（仅楼体层），命中则拉近距离（−0.7m 余量，下限 1.6m）——镜头永不穿楼。</li>
+        <li><b>震屏：</b>camShake 衰减量（dt×2.4）控制三轴随机偏移（±shake×0.55），落雷引爆时置 0.85。</li>
+        <li><b>下限钳制：</b>相机高度 &lt; 0.9m 时抬起，防止贴地翻转为地下视角。</li>
+      </ul>
+    </section>
+
+    <!-- 09 -->
+    <section id="s9">
+      <h3><span class="no">09</span>程序化音频（FR-17）</h3>
+
+      <p>无任何音频文件。一个 2 秒白噪声缓冲 + 少量振荡器，通过滤波器包络合成全部声音。
+      图结构：</p>
+
+      <div class="arch">
+        <div class="layer hl"><span class="name">master（Gain 0.9）</span><span class="mods">→ destination；M 键静音即置 0</span></div>
+        <div class="arrow">▲</div>
+        <div class="layer"><span class="name">常驻层 · 雨声</span><span class="mods">白噪(loop) → 带通 1750Hz Q0.55 → 高通 480Hz → rainGain（0.09 + 0.13×storm，随穹顶上升）</span></div>
+        <div class="layer"><span class="name">常驻层 · 风声</span><span class="mods">白噪(loop) → 低通 240Hz → Gain 0.16</span></div>
+        <div class="arrow">▲ 按需创建、播完即毁的一次性节点</div>
+        <div class="layer"><span class="name">事件层</span><span class="mods">雷鸣 · 落雷轰鸣 · 低频冲击 · 脉冲扫频 · 拾取三连音 · 无线电底噪</span></div>
+      </div>
+
+      <h4>事件音效配方</h4>
+      <table>
+        <thead><tr><th style="width:130px">音效</th><th>合成配方</th></tr></thead>
+        <tbody>
+          <tr><td><b>雷鸣</b></td><td>延迟 = min(2.2s, 距离/220 + 0.12)——声速近似；白噪 → 低通扫频 560→70Hz（2.4s）→ 包络（攻击 60ms，衰减 2.8s），音量按距离 max(0.12, 1−d/320)×0.85；d &lt; 60m 时叠加 64→24Hz 正弦低频冲击</td></tr>
+          <tr><td><b>落雷轰鸣</b></td><td>零延迟版雷鸣：低通 1200→90Hz（1.1s），攻击 20ms、增益 0.9——「炸在耳边」</td></tr>
+          <tr><td><b>回声脉冲</b></td><td>正弦扫频 1400→320Hz（0.55s），包络 0.18——声呐「ping」</td></tr>
+          <tr><td><b>碎片拾取</b></td><td>三角波 880 / 1320 / 1760Hz 三连音，间隔 60ms——上行琶音的正反馈</td></tr>
+          <tr><td><b>无线电残句</b></td><td>白噪 → 带通 1100Hz <b>Q=6</b>（高 Q 窄带即「隔着静电的人声频段」），1.4s 平顶 + 0.8s 释放</td></tr>
+        </tbody>
+      </table>
+
+      <h4>浏览器自动播放策略</h4>
+      <p>AudioContext 必须在用户手势后创建/恢复。<code>initAudio()</code> 挂在「进入雨夜」按钮点击上，
+      创建后立即检查 <code>ctx.state === 'suspended'</code> 并 resume。音频未就绪时全部播放函数静默返回，
+      游戏逻辑不依赖音频可用性。</p>
+
+      <div class="note">
+        <div class="t">为什么坚持程序化音频</div>
+        <p>① 零资产 = 零加载，首屏可玩指标不受伤；② 雷声延迟/音量与游戏内距离是同一套数值，视听同步天然成立；
+        ③ 包体无限接近 0，对「发一个链接就能玩」的传播形态友好。代价是音色天花板低（无真实采样质感），
+        若 M2 后需要更高质感，可对「雨幕底噪」单独引入采样文件，其余保留合成。</p>
+      </div>
+    </section>
+
+    <!-- 10 -->
+    <section id="s10">
+      <h3><span class="no">10</span>HUD 与屏幕后期（FR-13 / FR-14 / FR-16）</h3>
+
+      <h4>DOM 叠加层清单（z 序）</h4>
+      <table>
+        <thead><tr><th style="width:130px">层</th><th style="width:80px">z-index</th><th>实现</th></tr></thead>
+        <tbody>
+          <tr><td>#vignette</td><td>5</td><td>径向渐变暗角，常驻</td></tr>
+          <tr><td>#flash</td><td>6</td><td>纯色层 + mix-blend-mode: screen，闪电时 opacity 拉起（游戏状态 flash×0.62）</td></tr>
+          <tr><td>#hurt</td><td>6</td><td>边缘红色径向渐变，受击时淡出（hurt×0.9）</td></tr>
+          <tr><td>#drops</td><td>7</td><td>5 组 radial-gradient 圆点平铺（不同尺寸/间距），screen 混合模拟镜头水痕</td></tr>
+          <tr><td>#hud</td><td>10</td><td>生命/共鸣双条 + 穹顶进度 + 碎片计数 + 罗盘，全部 scaleX/rotate 驱动，不触发重排</td></tr>
+          <tr><td>#overlay</td><td>20</td><td>标题卡与结局卡（同一容器动态 innerHTML），hide 类淡出交出交互</td></tr>
+        </tbody>
+      </table>
+      <p>屏幕特效每帧只写 4 个 <code>style.opacity</code>（合成器属性），HUD 每帧写 transform 与 textContent，
+      无 layout thrashing。后期全部走 DOM 的决策使 GPU 管线保持「一次渲染、无后处理 pass」，
+      这是 55fps 预算的重要前提。</p>
+
+      <h4>罗盘数学</h4>
+      <p>把「塔 − 玩家」方向向量投影到玩家视角的前/右坐标系：
+      <code>fwd = −vx·sin(yaw) − vz·cos(yaw)</code>，<code>right = vx·cos(yaw) − vz·sin(yaw)</code>，
+      指针角度 = atan2(right, fwd)。罗盘永远以「玩家朝向」为上，距离取 2D 平面距离。</p>
+
+      <h4>字幕系统</h4>
+      <p>单行容器 + innerHTML（支持 <code>&lt;b&gt;</code> 强调色），say(text, dur) 用单 timer 覆盖式更新——
+      新字幕顶掉旧字幕，无队列。M1 分阶段引导（FR-15）需要字幕队列与触发条件系统，挂点已留好。</p>
+    </section>
+
+    <!-- 11 -->
+    <section id="s11">
+      <h3><span class="no">11</span>游戏状态与主循环</h3>
+
+      <h4>核心状态（state 对象）</h4>
+      <table>
+        <thead><tr><th style="width:200px">字段</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>started / over / won</td><td>三态机：title → running → ended（win/lose 共用 ended）</td></tr>
+          <tr><td>hp / resonance / frags / storm / time</td><td>四大资源与进度；storm = time / 300 是全部驱动曲线的自变量</td></tr>
+          <tr><td>yaw / pitch / vel / onGround</td><td>相机朝向与运动学状态</td></tr>
+          <tr><td>invuln / camShake / flash / hurt</td><td>无敌帧与表现层衰减量</td></tr>
+        </tbody>
+      </table>
+
+      <h4>胜负判定</h4>
+      <ul class="plain">
+        <li><b>胜利：</b>集齐 8 片 且 距塔水平距离 &lt; 9.2m（塔基碰撞盒外沿触发，无需寻找「门」）。</li>
+        <li><b>失败：</b>hp ≤ 0（被雷毙）或 storm ≥ 1（穹顶闭合），二者同帧出现时 hp 判定优先。</li>
+        <li><b>结局卡：</b>复用标题卡容器，动态渲染 eyebrow（SIGNAL SENT / LOST）+ 双结局文案 + 三项统计（碎片 / 剩余生命 / 雨中时长）。</li>
+      </ul>
+
+      <h4>实体生命周期管理</h4>
+      <p>临时实体（闪电折线、脉冲环、落雷环、冲击波）走「倒计时 + splice + dispose」模式，
+      常驻实体（碎片、涟漪实例）只改状态标志不复删建。长局内存平稳，无逐帧 new Mesh 的泄漏路径
+      （唯一例外：粒子着色器 uniform 中的临时 Vector3，M1 顺手常量化）。</p>
+    </section>
+
+    <!-- 12 -->
+    <section id="s12">
+      <h3><span class="no">12</span>性能预算与技术债</h3>
+
+      <h4>预算（对应 PRD 第 09 节）</h4>
+      <div class="cards">
+        <div class="card"><div class="h">帧率</div><div class="v">≥ 55 fps</div><div class="d">1080p / 中端 GPU；&lt; 45 触发降级（FR-19）</div></div>
+        <div class="card"><div class="h">Draw Call</div><div class="v">&lt; 120</div><div class="d">当前楼体为独立 Mesh，是最大不确定项</div></div>
+        <div class="card"><div class="h">三角面</div><div class="v">&lt; 800 k</div><div class="d">低多边形策略下宽裕</div></div>
+        <div class="card"><div class="h">纹理</div><div class="v">&lt; 6 MB</div><div class="d">实际仅 2 张运行时 Canvas 小图，远低于预算</div></div>
+        <div class="card"><div class="h">首屏可玩</div><div class="v">&lt; 3 s</div><div class="d">本地化依赖，file:// 零网络请求</div></div>
+        <div class="card"><div class="h">崩溃率</div><div class="v">&lt; 0.5%</div><div class="d">按会话计，埋点 perf_sample 监控</div></div>
+      </div>
+
+      <h4>当前热点分析</h4>
+      <table>
+        <thead><tr><th style="width:220px">热点</th><th style="width:90px">量级</th><th>分析与对策</th></tr></thead>
+        <tbody>
+          <tr><td><b>楼体独立 Mesh</b></td><td>~48 draw call（实测 24×24m 网格去空地后约 47–54 栋楼）</td><td>每栋楼一个 Mesh，Draw Call 随楼数线性涨（PRD 技术债①）。对策：按法线拆面合批为立面/屋顶两个 merged geometry。<b>已于 2026-10-28 偿还：全城楼体 2 次 Draw Call，整场景实测 44 次（含脉冲时 80 次），远低于 120 预算。</b>另注：PRD FR-01 验收写「楼体 60+ 栋」，当前生成器实际产出约 48 栋，未达标——需在 PRD 侧修正数值或调小网格步进。</td></tr>
+          <tr><td><b>涟漪每帧 CPU 矩阵</b></td><td>340 setMatrixAt/帧</td><td>可接受，但降级时第一个砍（340→200→120）。</td></tr>
+          <tr><td><b>相机射线检测</b></td><td>1 ray × ~200 盒/帧</td><td>Raycaster 对 Mesh 三角面求交较贵。对策：改为对 boxes[] AABB 做射线求交（解析解），或八叉粗筛。<b>M1 顺手项。</b></td></tr>
+          <tr><td><b>碎片点亮判定</b></td><td>8 次/帧</td><td>可忽略。</td></tr>
+          <tr><td><b>HUD textContent</b></td><td>5 节点/帧</td><td>可忽略；帧号变化时才写入的微优化可选。</td></tr>
+        </tbody>
+      </table>
+
+      <h4>技术债清单与偿还计划</h4>
+      <table>
+        <thead><tr><th style="width:60px">编号</th><th style="width:210px">债务</th><th style="width:90px">偿还节点</th><th>方案概要</th></tr></thead>
+        <tbody>
+          <tr><td class="id">TD-1</td><td>楼体未合批，Draw Call 线性涨</td><td><span class="b done">已偿还 2026-10-28</span></td><td>按法线拆面合批为立面/屋顶两个 merged geometry（MergedBuilder），全城 2 次 Draw Call</td></tr>
+          <tr><td class="id">TD-2</td><td>积水为高光近似，无真实反射</td><td><span class="b done">已偿还 2026-10-28</span></td><td>塔前主通道 15m 反射盘（js/tg/reflector.js：镜像相机 + 斜截视锥体 + 512² RT + 反射层隔离），外围积水潭保留高光近似</td></tr>
+          <tr><td class="id">TD-3</td><td>无自适应降级（FR-19）</td><td><span class="b p1">M2</span></td><td>选型见 13-D4：fps 滑动采样 → 三档画质自动切换</td></tr>
+          <tr><td class="id">TD-4</td><td>随机数不可播种复现</td><td><span class="b done">已偿还 2026-10-28</span></td><td>mulberry32 可播种 PRNG（TG.util.makeRng）替换 Math.random，seed 入控制台与结算卡「本局编号」</td></tr>
+          <tr><td class="id">TD-5</td><td>单文件 1400 行，协作与迭代受限</td><td><span class="b done">已偿还 2026-10-28</span></td><td>按 13-D1 拆为 js/tg/ 八个命名空间模块（config/util/audio/world/player/fx/hud/main），保留零构建与 file:// 直开</td></tr>
+          <tr><td class="id">TD-6</td><td>相机 Raycaster 走三角面求交</td><td><span class="b done">已偿还 2026-10-28</span></td><td>改 AABB 解析求交（slab 法，TG.player.raycastBoxes）</td></tr>
+          <tr><td class="id">TD-7</td><td>跳跃无土狼时间 / 输入缓冲</td><td><span class="b done">已偿还 2026-10-28</span></td><td>手感补丁：离地 0.1s 内仍可跳，落地前 0.12s 输入预存</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 13 -->
+    <section id="s13">
+      <h3><span class="no">13</span>演进路线（M1–M4 关键技术选型）</h3>
+
+      <p>与 PRD 第 12 节里程碑对齐，列出每个技术决策的候选方案与取舍。</p>
+
+      <h4>D1 · 代码模块化（M1，前置 TD-5）</h4>
+      <table>
+        <thead><tr><th style="width:200px">方案</th><th>取舍</th></tr></thead>
+        <tbody>
+          <tr><td><b>A. ES Modules + 构建步骤</b></td><td>工程体验最好，但引入 node 工具链，杀死「双击 index.html 即玩」——违背核心分发约束。<b>否决。</b></td></tr>
+          <tr><td><b>B. ES Modules + Import Map</b></td><td>无构建，但 file:// 下被 CORS 拦截，必须起本地服务器，玩家侧不可用。<b>否决。</b></td></tr>
+          <tr><td><b>C. 多 script 命名空间（选定）</b></td><td>按第 02 节六层拆为 6–8 个文件，挂 <code>window.TG</code> 命名空间，index.html 按依赖顺序引入。保留 file:// 直开与零构建；代价是无静态检查（用 JSDoc 注释 + 编辑器推断弥补）。<b>M1 执行。</b></td></tr>
+        </tbody>
+      </table>
+
+      <h4>D2 · 积水真实反射（FR-03，M1–M2）</h4>
+      <table>
+        <thead><tr><th style="width:200px">方案</th><th>取舍</th></tr></thead>
+        <tbody>
+          <tr><td><b>A. 全城 Planar Reflector</b></td><td>效果最真，但整地面一次额外场景渲染，帧预算翻倍风险。<b>否决。</b></td></tr>
+          <tr><td><b>B. SSR 屏幕空间反射</b></td><td>需后处理管线，与「后期走 DOM」原则冲突，移动端不可行。<b>否决。</b></td></tr>
+          <tr><td><b>C. 局部镜像 + 翻转网格（选定）</b></td><td>仅塔前主广场放一块 512² RenderTarget 的 Planar Reflector（只渲染楼体层）；外围积水保留现有高光近似。风格化「假反射」（翻转楼体 + 渐隐遮罩）作为 B 计划。预算内效果收益最大化。</td></tr>
+        </tbody>
+      </table>
+
+      <h4>D3 · 角色状态动画（FR-07，M1）</h4>
+      <p>原则：<b>不引入骨骼动画资产管线</b>（维持零资产），受击/跌倒/拾取/结局姿态用「目标姿态 + 姿态混合」实现——
+      为现有程序化摆动定义目标 pose（蜷缩/踉跄/举手），按事件触发 lerp 进出。若 M2 后表现力不足，再评估 glTF 骨骼角色，
+      届时模块化（D1）已完成，替换面收敛在 buildPlayer/updatePlayer 内。</p>
+
+      <h4>D4 · 性能自适应降级（FR-19，M2）</h4>
+      <ul class="plain">
+        <li><b>采样：</b>每帧累计 rAF 间隔，2s 输出一次滑动平均 fps 入 perf_sample 埋点。</li>
+        <li><b>三档位：</b>高（现状：雨 14000 / pixelRatio 1.85 / 涟漪 340）；中（8000 / 1.25 / 200）；低（4000 / 1.0 / 120 + 关 MSAA）。</li>
+        <li><b>切换规则：</b>连续两拍 &lt; 45fps 降一档，连续两拍 &gt; 58fps 升一档（防抖动，单向滞后），10s 冷却。</li>
+        <li><b>重建成本：</b>雨丝数变更需重建 BufferGeometry（一次性 ~10ms 卡顿，切档时用闪电白帧掩护）。</li>
+        <li><b>设置面板（FR-20）</b>暴露画质档位覆盖自动策略。</li>
+      </ul>
+
+      <h4>D5 · 空间化音频（FR-18，M1）</h4>
+      <p>WebAudio 原生 PannerNode（HRTF）挂到落雷预警环、碎片嗡鸣、雷声三个声源；AudioListener 每帧同步相机位姿。
+      纯节点操作，无资产引入，直接强化「听声辨位」的核心体验。风险：Safari HRTF 历史兼容性问题，验收矩阵单独列（第 14 节）。</p>
+
+      <h4>D6 · 移动端触控（FR-21，M3）</h4>
+      <p>虚拟摇杆（左）+ 拖屏视角（右）+ 脉冲大按钮；雨丝减半、涟漪减半、pixelRatio 1.0、关 MSAA 为移动档基准；
+      Pointer Lock 相关代码路径全部特性检测（<code>'ontouchstart' in window</code> 分流）。
+      需要真实设备矩阵测试，进入 M3 前先出技术预研 spike。</p>
+
+      <h4>D7 · 埋点与本地化（M2）</h4>
+      <ul class="plain">
+        <li><b>埋点：</b>按 PRD 第 11 节七事件实现 <code>TG.telemetry(event, fields)</code>；事件先写 localStorage 环形缓冲（离线可用），存在配置的上报端点时批量 POST；设置面板提供「匿名数据」开关（默认开）。</li>
+        <li><b>本地化：</b>抽离 fragLines、字幕、HUD、结局卡文案为 i18n 字典（简中为基准键），M3 增补繁中/英/日；程序化音频不受影响。</li>
+      </ul>
+
+      <h4>里程碑技术任务映射</h4>
+      <table>
+        <thead><tr><th style="width:130px">里程碑</th><th>技术任务</th></tr></thead>
+        <tbody>
+          <tr><td><b>M1 垂直切片</b></td><td>D1 模块化 · TD-1 合批 · TD-4 播种 PRNG · TD-6/7 相机与手感 · D2 反射（塔区） · D3 状态动画 · D5 空间音频 · FR-15 分阶段引导的字幕队列</td></tr>
+          <tr><td><b>M2 Alpha</b></td><td>D4 自适应降级 · FR-20 设置/键位 · D7 埋点接入 · 城市四分区（生成器参数化：分区材质主题 + 分区碎片锚点） · 难度模式（数值表分档）</td></tr>
+          <tr><td><b>M3 Beta</b></td><td>D6 移动端触控 · 本地化 · 「雷声回话」实体（可规避敌人 AI：听音趋近 + 脉冲暴露） · 第二座城（天气语义层抽象）</td></tr>
+          <tr><td><b>M4 发布</b></td><td>静态托管（CDN）+ 分发监控 · 视数据决定 PC 移植评估（Tauri/Electron 壳复用 Web 技术栈）</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 14 -->
+    <section id="s14">
+      <h3><span class="no">14</span>测试与风险</h3>
+
+      <h4>兼容性验收矩阵</h4>
+      <table>
+        <thead><tr><th style="width:200px">项</th><th>标准</th></tr></thead>
+        <tbody>
+          <tr><td>浏览器</td><td>Chrome / Edge / Firefox / Safari（含 macOS）最新两个大版本：可完成一整局</td></tr>
+          <tr><td>WebGL</td><td>WebGL2 优先；WebGL1 回退可跑（three.js 自动降级），验证着色器无 GLSL 100 语法冲突</td></tr>
+          <tr><td>音频解锁</td><td>首击后 AudioContext resume；后台标签页切回不爆音；M 静音状态跨局保持（现状 reload 后重置，随 FR-20 一并修复）</td></tr>
+          <tr><td>指针锁定</td><td>Esc 退出后点击画布可重新锁定；锁定失败（iframe 嵌入）时方向键转向方案可用</td></tr>
+          <tr><td>性能</td><td>1080p 中端 GPU ≥ 55 fps 中位数；集成显卡不低于 40 fps（等待 D4 兜底）</td></tr>
+        </tbody>
+      </table>
+
+      <h4>回归清单（映射 PRD 验收条款）</h4>
+      <table>
+        <thead><tr><th style="width:100px">关联</th><th>回归项</th></tr></thead>
+        <tbody>
+          <tr><td class="id">FR-01</td><td>城市直径 ≥ 190m、楼 60+、无穿模；重开布局随机、出生点在可通行区</td></tr>
+          <tr><td class="id">FR-02</td><td>14000 雨丝 1080p ≥ 55fps；闪电瞬间雨幕提亮</td></tr>
+          <tr><td class="id">FR-04</td><td>闪电照亮远处轮廓；间隔随穹顶 4.2s→0.8s 收紧</td></tr>
+          <tr><td class="id">FR-05</td><td>行走 5.0 / 疾跑 8.6；转身平滑；碰撞半径 0.5m</td></tr>
+          <tr><td class="id">FR-08</td><td>耗 25 / 回 7.5 每秒 / 满值 4 连发；纯黑可完成导航</td></tr>
+          <tr><td class="id">FR-09</td><td>8 碎片全部生成在可通行位（freeSpot 生效）；八段文本顺序固定</td></tr>
+          <tr><td class="id">FR-11</td><td>预警环红色可辨 1.35s；落雷在 6–22m 环带；高进度多连发</td></tr>
+          <tr><td class="id">FR-16</td><td>双结局卡 + 三项统计正确</td></tr>
+        </tbody>
+      </table>
+
+      <h4>技术风险与对策</h4>
+      <table>
+        <thead><tr><th style="width:210px">风险</th><th style="width:70px">概率</th><th style="width:70px">影响</th><th>对策</th></tr></thead>
+        <tbody>
+          <tr><td>低端 GPU 掉帧且无降级（TD-3 未偿还前）</td><td>中</td><td>高</td><td>M2 完成 D4；之前在页面加「建议 Chrome + 独显」提示</td></tr>
+          <tr><td>WebGL 上下文丢失（长局 / 切后台）</td><td>低</td><td>高</td><td>监听 webglcontextlost，提示一键重开；结算前 state 不落盘所以损失可接受</td></tr>
+          <tr><td>three.min.js 版本演进带来的 API 漂移</td><td>低</td><td>低</td><td>已本地锁版本；升级视为独立变更走回归清单</td></tr>
+          <tr><td>Safari 音频 / HRTF 差异（D5 引入）</td><td>中</td><td>中</td><td>特性检测降级到无 HRTF 的 equalpower 声像</td></tr>
+          <tr><td>单文件继续膨胀引发回归（TD-5 未偿还前）</td><td>高</td><td>中</td><td>M1 立即执行 D1 拆分；拆分前冻结非必要功能改动</td></tr>
+          <tr><td>GPU 浮点差异导致雨幕 wrap 接缝可见</td><td>低</td><td>低</td><td>接缝位于取景窗口边缘且被雾遮蔽，回归清单观察项</td></tr>
+        </tbody>
+      </table>
+
+      <h4>关联文档</h4>
+      <div class="note">
+        <div class="t">文档族</div>
+        <p>PRD v0.1（product-doc.html）· 可玩原型（index.html）· 玩家手册（player-manual.html）· 概念新闻稿（press-release.html）</p>
+      </div>
+    </section>
+
+    <footer>
+      <span>MISTPORT STUDIO © 2026 · 雷隙 THUNDERGAP</span>
+      <span>技术方案 v0.1 · 2026-10-28</span>
+    </footer>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>新闻稿 · 雾港工作室公布《雷隙 THUNDERGAP》</title>
+<style>
+  :root{
+    --ink:#1a2430;
+    --ink-soft:#4a5a6a;
+    --cyan:#0e7f9e;
+    --cyan-deep:#0a5a72;
+    --line:#d7e2ea;
+    --paper:#fbfcfd;
+    --rain:#eef4f8;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"Songti SC","Noto Serif SC","Source Han Serif SC",Georgia,serif;
+    background:linear-gradient(180deg,#e9f1f6 0%, var(--paper) 320px);
+    color:var(--ink);line-height:2;font-size:16px;
+  }
+  .sheet{
+    max-width:860px;margin:0 auto;padding:0 40px 90px;
+  }
+  /* 顶部雨幕装饰 */
+  .rainband{
+    height:110px;position:relative;overflow:hidden;
+    background:linear-gradient(180deg,#0e1b28 0%,#14324a 70%,#1d5a78 100%);
+  }
+  .rainband::before{
+    content:"";position:absolute;inset:0;opacity:.5;
+    background-image:
+      repeating-linear-gradient(74deg, rgba(190,230,255,.16) 0 1px, transparent 1px 26px),
+      repeating-linear-gradient(74deg, rgba(190,230,255,.10) 0 1px, transparent 1px 47px);
+  }
+  .rainband::after{
+    content:"";position:absolute;left:0;right:0;bottom:0;height:26px;
+    background:repeating-linear-gradient(90deg,#1d5a78 0 90px,#277398 90px 96px,#1d5a78 96px 200px);
+    opacity:.65;
+  }
+  .tagline{
+    position:absolute;left:50%;bottom:34px;transform:translateX(-50%);
+    color:#bfe4f5;font-size:11px;letter-spacing:.62em;white-space:nowrap;
+  }
+  .tagline b{color:#fff;font-weight:600;}
+
+  .notice{
+    margin:26px 0 0;padding:10px 16px;border:1px dashed var(--line);
+    background:var(--rain);color:var(--ink-soft);
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;font-size:12px;letter-spacing:.06em;
+    border-radius:3px;
+  }
+
+  header{padding:38px 0 8px;text-align:center;}
+  .kicker{
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    font-size:11px;letter-spacing:.5em;color:var(--cyan);margin-bottom:22px;
+  }
+  .kicker b{font-weight:700;}
+  h1{
+    font-size:clamp(24px,4vw,34px);font-weight:700;line-height:1.6;letter-spacing:.04em;
+    margin:0 auto;max-width:680px;
+  }
+  .deck{
+    margin:18px auto 0;max-width:620px;color:var(--ink-soft);
+    font-size:15px;line-height:1.95;
+  }
+  .rule{
+    width:64px;height:3px;background:var(--cyan);margin:30px auto 0;border-radius:2px;
+  }
+  .meta{
+    margin-top:26px;text-align:center;
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    font-size:12.5px;letter-spacing:.18em;color:var(--ink-soft);
+  }
+  .meta b{color:var(--ink);}
+
+  article{margin-top:34px;}
+  article p{margin:0 0 22px;text-indent:2em;}
+  article p.noindent{text-indent:0;}
+  .lead::first-letter{color:var(--cyan-deep);}
+  strong{font-weight:700;}
+  em{font-style:normal;color:var(--cyan-deep);font-weight:600;}
+
+  h2{
+    font-size:19px;font-weight:700;letter-spacing:.08em;margin:38px 0 16px;
+    padding-left:14px;border-left:4px solid var(--cyan);line-height:1.5;
+  }
+  ul.features{list-style:none;margin:6px 0 10px;}
+  ul.features li{
+    position:relative;padding:10px 0 10px 26px;border-bottom:1px solid var(--line);
+    font-size:15px;line-height:1.9;
+  }
+  ul.features li::before{
+    content:"⚡";position:absolute;left:2px;top:10px;font-size:13px;color:var(--cyan);
+  }
+  ul.features b{font-weight:700;}
+
+  blockquote{
+    margin:30px 0;padding:26px 30px;background:var(--rain);
+    border-left:4px solid var(--cyan);border-radius:0 4px 4px 0;
+  }
+  blockquote p{margin:0 0 10px;font-size:15.5px;line-height:2.05;text-indent:0;}
+  blockquote cite{
+    display:block;text-align:right;font-style:normal;
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    font-size:12.5px;letter-spacing:.12em;color:var(--ink-soft);
+  }
+
+  .specs{
+    margin:14px 0 6px;border:1px solid var(--line);border-radius:4px;overflow:hidden;
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;font-size:13.5px;
+  }
+  .specs div{
+    display:grid;grid-template-columns:150px 1fr;border-bottom:1px solid var(--line);
+  }
+  .specs div:last-child{border-bottom:none;}
+  .specs span{
+    padding:10px 16px;background:var(--rain);color:var(--ink-soft);letter-spacing:.08em;
+  }
+  .specs i{padding:10px 16px;font-style:normal;}
+
+  .try{
+    margin:34px 0 0;padding:22px 26px;text-align:center;
+    background:linear-gradient(180deg,#0e1b28,#14324a);border-radius:6px;color:#d8ecf7;
+  }
+  .try p{margin:0 0 14px;font-size:14px;letter-spacing:.06em;text-indent:0;}
+  .try a{
+    display:inline-block;padding:11px 38px;border:1px solid rgba(160,225,255,.55);
+    border-radius:3px;color:#aee4ff;text-decoration:none;
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    font-size:13px;letter-spacing:.3em;transition:.25s;
+  }
+  .try a:hover{background:rgba(127,233,255,.12);box-shadow:0 0 24px rgba(127,233,255,.25);}
+
+  .press-end{
+    margin-top:44px;text-align:center;color:var(--ink-soft);
+    font-size:12px;letter-spacing:.5em;
+  }
+  .contact{
+    margin-top:34px;padding-top:22px;border-top:1px solid var(--line);
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    font-size:13px;color:var(--ink-soft);line-height:2.1;
+  }
+  .contact b{color:var(--ink);letter-spacing:.14em;}
+  .about{
+    margin-top:26px;padding:18px 22px;background:var(--rain);border-radius:4px;
+    font-size:13.5px;color:var(--ink-soft);line-height:2;
+  }
+  .about b{color:var(--ink);}
+  footer{
+    margin-top:56px;text-align:center;
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    font-size:11px;letter-spacing:.2em;color:#9db0be;
+  }
+</style>
+</head>
+<body>
+<div class="rainband">
+  <div class="tagline"><b>MISTPORT STUDIO</b>&nbsp;·&nbsp;GAME ANNOUNCEMENT&nbsp;·&nbsp;2026</div>
+</div>
+
+<div class="sheet">
+
+  <p class="notice">※ 本稿为游戏创意的概念新闻稿（Concept Press Release），用于呈现《雷隙 THUNDERGAP》这一游戏构想；文中工作室、人物与联系方式均为提案设定。</p>
+
+  <header>
+    <div class="kicker"><b>即时发布</b> · FOR IMMEDIATE RELEASE</div>
+    <h1>雾港工作室公布雷雨夜 3D 动作游戏《雷隙 THUNDERGAP》：<br />在雷暴吞没城市之前，听见那些没能说出口的话</h1>
+    <p class="deck">一款以「雷雨」为舞台的第三人称 3D 动作游戏——玩家扮演能听见闪电回声的少女林隙，在一座被雷暴穹顶压住的漆黑城市里，靠一次次「回声脉冲」照亮前路，收集碎成八片的求救信号，赶在穹顶闭合前抵达广播塔。</p>
+    <div class="rule"></div>
+    <p class="meta"><b>发布日期</b>：2026 年 10 月 28 日&nbsp;&nbsp;|&nbsp;&nbsp;<b>发布地</b>：中国·深圳&nbsp;&nbsp;|&nbsp;&nbsp;<b>类型</b>：3D 动作 / 氛围探索</p>
+  </header>
+
+  <article>
+    <p class="lead noindent">【核心创意】大多数游戏把雷雨当作背景音效，《雷隙 THUNDERGAP》把雷雨本身做成了敌人、路标和叙事者。游戏发生在一座被持续暴雨笼罩的城市：通讯中断，街道积水，一座不肯散去的雷暴穹顶正以每九十秒一次的闪电向下收缩。玩家每一次按下脉冲键，都会以自身为圆心荡开一圈可见的声呐光纹——在绝对的黑夜里，这是唯一的地图。</p>
+
+    <p>【主角：听雷者·林隙】本作主角由开发团队原创设定：十七岁的少女林隙（Lin Xi），因童年的一场雷击获得了「听见闪电回声」的能力——雷声掠过之后，空气中残留的电磁颤动能被她重新收听。她的弟弟林洛被困在城市另一端的广播塔下，最后的求救信号被雷暴撕碎成八片「雷纹」，散落在积水与高楼之间。玩家将操纵林隙在雨夜中奔跑、跳跃、疾行，用回声脉冲逐一寻回这八段声音，并拼出这个雨夜真正的结局。</p>
+
+    <h2>核心玩法特色</h2>
+    <ul class="features">
+      <li><b>回声脉冲（Echo Pulse）</b>——以玩家为圆心扩散的声呐光纹，短暂点亮城市轮廓与碎片位置；共鸣值有限，按下 E 的时机就是本作的策略核心。</li>
+      <li><b>雷暴穹顶倒计时</b>——穹顶持续收缩，闪电越来越密、落雷越来越近；每收回一片雷纹，就为这座城市争取多一分钟的生存时间。</li>
+      <li><b>动态落雷机制</b>——地面会提前浮现红色预警圈，1.4 秒后天雷落下：躲开它，或借它的闪光看清远方。</li>
+      <li><b>叙事化收集</b>——八片雷纹对应弟弟的八段无线电残句，从「雨太大了」到「最后一个频段我留给你」，收集即读故事。</li>
+      <li><b>完全程序化的雷雨</b>——一万四千条 GPU 雨丝、水面涟漪、程序合成雷声与雨声：每一次闪电与雷鸣都由算法实时生成，没有两场相同的雷雨。</li>
+    </ul>
+
+    <h2>开发团队的话</h2>
+    <blockquote>
+      <p>「我们想回答一个问题：恐惧和温柔能不能来自同一场雷雨？雷暴是本作唯一的反派，它不追你、不咬你，它只是不断逼近——而你要在它的间隙里，把一个人临终前最温柔的话捡回来。」</p>
+      <p>「回声脉冲是我们最喜欢的机制：它让『黑暗』不再是惩罚，而是一张等待被敲响的鼓面。你越安静，听得越远。」</p>
+      <cite>—— 陈雾港，《雷隙》创意总监 · 雾港工作室</cite>
+    </blockquote>
+
+    <h2>技术规格</h2>
+    <div class="specs">
+      <div><span>引擎 / 渲染</span><i>WebGL（three.js）· 实时 3D，无需下载客户端</i></div>
+      <div><span>视角 / 操作</span><i>第三人称越肩视角 · 键鼠（WASD + 空格 + E）</i></div>
+      <div><span>音频方案</span><i>WebAudio 全程序化合成：雨、雷、脉冲与无线电均实时生成，建议佩戴耳机</i></div>
+      <div><span>单局时长</span><i>约 4–6 分钟（雷暴穹顶闭合倒计时）</i></div>
+      <div><span>目标平台</span><i>桌面浏览器（Chrome / Edge / Safari），可扩展至移动端与主机</i></div>
+    </div>
+
+    <div class="try">
+      <p>概念原型现已开放体验 —— 在浏览器中直接进入这场雨。</p>
+      <a href="./index.html">进 入 雨 夜</a>
+    </div>
+
+    <p class="press-end">— 30 —</p>
+
+    <div class="about">
+      <b>关于雾港工作室</b><br />
+      雾港工作室（Mistport Studio）是一支专注于「天气叙事」的小型游戏创意团队，相信天气不只是画面滤镜，而应当成为玩法、节奏与情感的核心构件。《雷隙 THUNDERGAP》是工作室「气象三部曲」构想的第一部，主题为「雷」；后续两部将分别围绕「雾」与「雪」展开。
+    </div>
+
+    <div class="contact">
+      <b>媒体联系</b><br />
+      雾港工作室 · 市场与传播部<br />
+      邮箱：press@mistport.studio（示例）&nbsp;&nbsp;|&nbsp;&nbsp;电话：+86 000 0000 0000（示例）<br />
+      素材包（截图 / Logo / 立项 PDF）：可向媒体邮箱索取
+    </div>
+  </article>
+
+  <footer>MISTPORT STUDIO © 2026 · CONCEPT PRESS RELEASE · 雷隙 THUNDERGAP</footer>
+</div>
+</body>
+</html>
